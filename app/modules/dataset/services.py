@@ -92,6 +92,9 @@ class DataSetService(BaseService):
     def get_all_datasets(self):
         return self.repository.get_all_datasets()
 
+    def get_all_datasets(self):
+        return self.repository.get_all_datasets()
+
     def total_dataset_views(self) -> int:
         return self.dsviewrecord_repostory.total_dataset_views()
 
