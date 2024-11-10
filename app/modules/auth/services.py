@@ -31,6 +31,7 @@ class AuthenticationService(BaseService):
             password = kwargs.pop("password", None)
             name = kwargs.pop("name", None)
             surname = kwargs.pop("surname", None)
+            developer = kwargs.pop("developer", False)
 
             if not email:
                 raise ValueError("Email is required.")
@@ -43,7 +44,8 @@ class AuthenticationService(BaseService):
 
             user_data = {
                 "email": email,
-                "password": password
+                "password": password,
+                "developer": developer
             }
 
             profile_data = {

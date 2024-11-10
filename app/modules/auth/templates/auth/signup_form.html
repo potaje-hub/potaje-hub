@@ -71,6 +71,18 @@
                 </div>
 
                 <div class="row">
+                    <div class="col-md-6 col-lg-6 col-xs-12">
+                        <div class="mb-3">
+                            {{ form.developer.label(class="form-label") }}
+                            {{ form.developer(class="form-check-input", id="developer_checkbox") }} 
+                            {% for error in form.developer.errors %}
+                                <span style="color: red;">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
 
                     <div class="col-lg-6 col-12">
                         {{ form.submit(class="btn btn-primary") }}
