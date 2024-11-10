@@ -19,6 +19,8 @@ function send_query() {
             const searchCriteria = {
                 csrf_token: csrfToken,
                 query: document.querySelector('#query').value,
+                number_of_models: document.querySelector('#number_of_models').value,
+                number_of_features: document.querySelector('#number_of_features').value,
                 publication_type: document.querySelector('#publication_type').value,
                 sorting: document.querySelector('[name="sorting"]:checked').value,
             };
@@ -167,6 +169,16 @@ function clearFilters() {
     queryInput.value = "";
     // queryInput.dispatchEvent(new Event('input', {bubbles: true}));
 
+    // Reset the search number_of_models
+    let numberOfModelsInput = document.querySelector('#number_of_models');
+    numberOfModelsInput.value = "";
+    // numberOfModelsInput.dispatchEvent(new Event('input', {bubbles: true}));
+
+    // Reset the search number_of_models
+    let numberOfFeaturessInput = document.querySelector('#number_of_features');
+    numberOfFeaturessInput.value = "";
+    // numberOfFeaturessInput.dispatchEvent(new Event('input', {bubbles: true}));
+
     // Reset the publication type to its default value
     let publicationTypeSelect = document.querySelector('#publication_type');
     publicationTypeSelect.value = "any"; // replace "any" with whatever your default value is
@@ -201,5 +213,37 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         const queryInput = document.getElementById('query');
         queryInput.dispatchEvent(new Event('input', {bubbles: true}));
+    }
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    
+    let urlParams = new URLSearchParams(window.location.search);
+    let numberOfModelsParam = urlParams.get('number_of_models');
+
+    if (numberOfModelsParam) {
+        const numberOfModelsInput = document.getElementById('number_of_models');
+        numberOfModelsInput.value = numberOfModelsParam
+        numberOfModelsInput.dispatchEvent(new Event('input', {bubbles: true}));
+        console.log("throw event")
+    } else {
+        const numberOfModelsInput = document.getElementById('number_of_models');
+        numberOfModelsInput.dispatchEvent(new Event('input', {bubbles: true}));
+    }
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    
+    let urlParams = new URLSearchParams(window.location.search);
+    let numberOfFeaturesParam = urlParams.get('number_of_features');
+
+    if (numberOfFeaturesParam) {
+        const numberOfFeaturesInput = document.getElementById('number_of_features');
+        numberOfFeaturesInput.value = numberOfFeaturesParam
+        numberOfFeaturesInput.dispatchEvent(new Event('input', {bubbles: true}));
+        console.log("throw event")
+    } else {
+        const numberOfFeaturesInput = document.getElementById('number_of_features');
+        numberOfFeaturesInput.dispatchEvent(new Event('input', {bubbles: true}));
     }
 });
