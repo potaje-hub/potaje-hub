@@ -8,7 +8,7 @@ def initialize_driver():
     options = webdriver.ChromeOptions()
 
     # Initialise the browser using WebDriver Manager
-    service = Service(ChromeDriverManager().install())
+    service = Service('/home/miguel/Descargas/chromedriver-linux64 (1)/chromedriver-linux64/chromedriver')
     driver = webdriver.Chrome(service=service, options=options)
     return driver
 
