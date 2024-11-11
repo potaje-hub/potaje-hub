@@ -18,15 +18,15 @@ def login_to_portal(session, base_url, email, password):
         "password": password,
         "submit": "Login"
     }
-    login_response = session.post(f"{base_url}/login", data=login_data)
+    login_response = session.post(f"{base_url}/login", data=login_data, verify=False)
     soup = BeautifulSoup(login_response.text, 'html.parser')
     if soup.find('a', string="Login"):
         return False
     return True
 
 TOKEN = '7318289178:AAGlwhBrbP-6RVSpx67k-B1izPLZYMIrRO0'
-# BASE_URL = "http://127.0.0.1:5000"
-BASE_URL = "https://0ccf-81-36-184-135.ngrok-free.app/"
+BASE_URL = "http://127.0.0.1:5000"
+# BASE_URL = "https://fa09-193-147-173-132.ngrok-free.app"
 
 EMAIL, PASSWORD = range(2)
 TITLE, DESCRIPTION, PUBLICATION_TYPE, DOI, TAGS = range(5)
@@ -60,8 +60,8 @@ async def login(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await context.bot.send_message(chat_id=update.effective_chat.id, text="Use /help para conocer los comandos disponibles.")
 
         return
-    if os.path.exists(str(update.effective_chat.id)):
-        shutil.rmtree(str(update.effective_chat.id), ignore_errors=True)
+    if os.path.exists("media/" + str(update.effective_chat.id)):
+        shutil.rmtree("media/" + str(update.effective_chat.id), ignore_errors=True)
     await context.bot.send_message(chat_id=update.effective_chat.id, text="Introduzca el correo electrónico.")
     return EMAIL
 
@@ -87,13 +87,13 @@ async def password(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return ConversationHandler.END
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await context.bot.send_message(chat_id=update.effective_chat.id, text="Login cancelado.")
+    await context.bot.send_message(chat_id=update.effective_chat.id, text="Acción cancelada.")
     return ConversationHandler.END
 
 async def logout(update: Update, context: ContextTypes.DEFAULT_TYPE):
     session.get(f"{BASE_URL}/logout")
     logged_in_users.pop(update.effective_chat.id, None)
-    shutil.rmtree(str(update.effective_chat.id), ignore_errors=True)
+    shutil.rmtree("media/" + str(update.effective_chat.id), ignore_errors=True)
     await context.bot.send_message(chat_id=update.effective_chat.id, text="Sesión cerrada correctamente.")
 
 async def my_datasets(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -120,9 +120,9 @@ async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not document.file_name.endswith('.uvl'):
         await update.message.reply_text("Solo se permiten archivos con extensión .uvl. Por favor, adjunte un archivo válido.")
         return ConversationHandler.END
-    if not os.path.exists(str(update.effective_chat.id)):
-        os.makedirs(str(update.effective_chat.id))
-    file_path = os.path.join(str(update.effective_chat.id), document.file_name)
+    if not os.path.exists("media/" + str(update.effective_chat.id)):
+        os.makedirs("media/" + str(update.effective_chat.id))
+    file_path = os.path.join("media/" + str(update.effective_chat.id), document.file_name)
     
     file = await document.get_file()
     await file.download_to_drive(file_path)
@@ -130,10 +130,10 @@ async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['file_path'] = file_path
     
     await update.message.reply_text(f"Archivo '{document.file_name}' descargado correctamente.")
-    await update.message.reply_text(f"Se han subido un total de {len(os.listdir(str(update.effective_chat.id)))} archivos.")
+    await update.message.reply_text(f"Se han subido un total de {len(os.listdir("media/" + str(update.effective_chat.id)))} archivos.")
     
 async def upload(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if len(os.listdir(str(update.effective_chat.id)))<1 or not os.path.exists(str(update.effective_chat.id)):
+    if not os.path.exists("media/" + str(update.effective_chat.id)) or len(os.listdir("media/" + str(update.effective_chat.id)))<1:
         await context.bot.send_message(chat_id=update.effective_chat.id, text="Debes adjuntar primero uno o varios archivos")
         return
     await context.bot.send_message(chat_id=update.effective_chat.id, text="Escriba el título del dataset")
@@ -173,7 +173,7 @@ async def doi(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def tags(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['tags'] = update.message.text.split(',')
-    archives = "\n".join(f"- {archivo}" for archivo in os.listdir(str(update.effective_chat.id)))
+    archives = "\n".join(f"- {archivo}" for archivo in os.listdir("media/" + str(update.effective_chat.id)))
     
     await update.message.reply_text(f"Datos recopilados:\n"
                                   f"Título: {context.user_data['title']}\n"
@@ -195,14 +195,20 @@ async def tags(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     return ConversationHandler.END
 
+async def test(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    file_path = "media/prueba.uvl"
+    
+    await context.bot.send_document(chat_id=update.effective_chat.id, document=open(file_path, 'rb'))
+
 async def help(update: Update, context: ContextTypes.DEFAULT_TYPE):
     help_text = (
         "/start - Inicia el bot.\n"
         "/login - Inicia sesión con tu correo y contraseña.\n"
         "/logout - Cierra sesión.\n"
         "/myDatasets - Muestra tus datasets.\n"
-        "Para empezar con el proceso de subida, adjunta los archivos y luego envía el comando /upload.\n"
+        "Para empezar con el proceso de subida, adjunta los archivos en formato .uvl y luego envía el comando /upload.\n"
         "/upload - Sube los archivos adjuntados a Uvlhub\n"
+        "/test - Descarga un archivo .uvl de prueba.\n"
         "/help - Muestra esta lista de comandos.\n"
         
     )
@@ -255,6 +261,7 @@ if __name__ == '__main__':
     )
     logout_handler = CommandHandler('logout', logout)
     list_my_datasets_handler = CommandHandler('myDatasets', my_datasets)
+    test_handler = CommandHandler('test', test)
     help_handler = CommandHandler('help', help)
     unknown_handler = MessageHandler(filters.COMMAND, unknown)
     
@@ -264,6 +271,7 @@ if __name__ == '__main__':
     application.add_handler(document_handler)
     application.add_handler(list_my_datasets_handler)
     application.add_handler(conversation_handler)
+    application.add_handler(test_handler)
     application.add_handler(help_handler)
     application.add_handler(unknown_handler)
 
