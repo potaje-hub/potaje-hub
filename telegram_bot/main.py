@@ -7,8 +7,10 @@ import requests
 from bs4 import BeautifulSoup
 import re
 
+csrf_token = None
 
 def login_to_portal(session, base_url, email, password):
+    global csrf_token
     login_page = session.get(f"{base_url}/login")
     soup = BeautifulSoup(login_page.text, 'html.parser')
     csrf_token = soup.find('input', {'name': 'csrf_token'})['value']
@@ -29,7 +31,7 @@ BASE_URL = "http://127.0.0.1:5000"
 # BASE_URL = "https://fa09-193-147-173-132.ngrok-free.app"
 
 EMAIL, PASSWORD = range(2)
-TITLE, DESCRIPTION, PUBLICATION_TYPE, DOI, TAGS = range(5)
+TITLE, DESCRIPTION, PUBLICATION_TYPE, DOI, TAGS, CONFIRMATION = range(6)
 
 VALID_PUBLICATION_TYPES = [
     "None", "Annotation Collection", "Book", "Book Section", "Conference Paper", 
@@ -181,19 +183,62 @@ async def tags(update: Update, context: ContextTypes.DEFAULT_TYPE):
                                   f"Tipo de publicación: {context.user_data['publication_type']}\n"
                                   f"DOI: {context.user_data['doi']}\n"
                                   f"Etiquetas: {', '.join(context.user_data['tags'])}\n"
-                                f"Archivos adjuntos:\n{archives}")
+                                f"Archivos adjuntos:\n{archives}")    
     
-    file_path = context.user_data['file_path']
-    title = context.user_data['title']
-    description = context.user_data['description']
-    publication_type = context.user_data['publication_type']
-    doi = context.user_data['doi']
-    tags = context.user_data['tags']
+    keyboard = [
+        [InlineKeyboardButton("Confirmar", callback_data="confirm_upload")],
+        [InlineKeyboardButton("Cancelar", callback_data="cancel_upload")]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
     
+    await update.message.reply_text("¿Estás seguro de querer subir el dataset con estos datos?", reply_markup=reply_markup)
     
-    await update.message.reply_text("Gracias por enviar los datos. ¡Todo está listo!")
+    return CONFIRMATION
+
+async def confirmation(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    global csrf_token
+    query = update.callback_query
+    await query.answer()
     
+    if query.data == "confirm_upload":
+        data = {
+            "csrf_token": csrf_token,
+            "title": context.user_data['title'],
+            "desc": context.user_data['description'],
+            "publication_type": str(context.user_data['publication_type']).replace("_", " ").lower( ),
+            "publication_doi": "",
+            "tags": ','.join(context.user_data['tags']),
+            "feature_models-0-uvl_filename": os.listdir("media/" + str(update.effective_chat.id))[0],
+            'feature_models-0-title': '',  # Campo vacío según el ejemplo
+            'feature_models-0-desc': '',  # Campo vacío según el ejemplo
+            'feature_models-0-publication_type': 'none',
+            'feature_models-0-publication_doi': '',
+            'feature_models-0-tags': '',
+            'feature_models-0-uvl_version': '',
+            "authors-0-name": "Author Name",
+        }
+        
+        files = [
+            ('feature_models-0-file', open(os.path.join("media/" + str(update.effective_chat.id), archivo), 'rb'))
+            for archivo in os.listdir("media/" + str(update.effective_chat.id))
+        ]
+        print(files)
+        response = session.post(f"{BASE_URL}/dataset/upload", data=data, files=files)
+
+        if response.status_code == 200:
+            await query.edit_message_text("Dataset subido exitosamente a Uvlhub.")
+        else:
+            print(response.json())
+            await query.edit_message_text(f"Error en la subida: {response.json().get('message', 'Error desconocido')}")
+        
+        for _, file_obj in files:
+            file_obj.close()
+
+    elif query.data == "cancel_upload":
+        await query.edit_message_text("Subida del dataset cancelada.")
+
     return ConversationHandler.END
+
 
 async def test(update: Update, context: ContextTypes.DEFAULT_TYPE):
     file_path = "media/prueba.uvl"
@@ -256,6 +301,10 @@ if __name__ == '__main__':
             MessageHandler(filters.TEXT & ~filters.COMMAND, tags),
             MessageHandler(filters.Document.ALL, handle_new_file_during_upload)
         ],
+        CONFIRMATION: [
+            CallbackQueryHandler(confirmation),
+            MessageHandler(filters.Document.ALL, handle_new_file_during_upload)
+            ],
         },
     fallbacks=[CommandHandler('cancel', cancel)],
     )
