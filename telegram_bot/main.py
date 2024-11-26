@@ -6,6 +6,11 @@ from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, Messa
 import requests
 from bs4 import BeautifulSoup
 import re
+from app.modules.dataset.services import DataSetService
+
+
+dataset_service = DataSetService()
+
 
 csrf_token = None
 
@@ -27,9 +32,10 @@ def login_to_portal(session, base_url, email, password):
     return True
 
 TOKEN = '7318289178:AAGlwhBrbP-6RVSpx67k-B1izPLZYMIrRO0'
-# BASE_URL = "http://127.0.0.1:5000"
-BASE_URL = "https://www.uvlhub.io"
+BASE_URL = "http://127.0.0.1:5000"
+# BASE_URL = "https://www.uvlhub.io"
 # BASE_URL = "https://fa09-193-147-173-132.ngrok-free.app"
+
 
 EMAIL, PASSWORD = range(2)
 TITLE, DESCRIPTION, PUBLICATION_TYPE, DOI, TAGS, CONFIRMATION = range(6)
@@ -63,8 +69,8 @@ async def login(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await context.bot.send_message(chat_id=update.effective_chat.id, text="Use /help para conocer los comandos disponibles.")
 
         return
-    if os.path.exists("media/" + str(update.effective_chat.id)):
-        shutil.rmtree("media/" + str(update.effective_chat.id), ignore_errors=True)
+    if os.path.exists("telegram_bot/media/" + str(update.effective_chat.id)):
+        shutil.rmtree("telegram_bot/media/" + str(update.effective_chat.id), ignore_errors=True)
     await context.bot.send_message(chat_id=update.effective_chat.id, text="Introduzca el correo electrónico.")
     return EMAIL
 
@@ -96,25 +102,42 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def logout(update: Update, context: ContextTypes.DEFAULT_TYPE):
     session.get(f"{BASE_URL}/logout")
     logged_in_users.pop(update.effective_chat.id, None)
-    shutil.rmtree("media/" + str(update.effective_chat.id), ignore_errors=True)
+    shutil.rmtree("telegram_bot/media/" + str(update.effective_chat.id), ignore_errors=True)
     await context.bot.send_message(chat_id=update.effective_chat.id, text="Sesión cerrada correctamente.")
 
 async def my_datasets(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_chat.id not in logged_in_users:
         await context.bot.send_message(chat_id=update.effective_chat.id, text="Debe iniciar sesión para usar este comando.")
+        await context.bot.send_message(chat_id=update.effective_chat.id, text="Usa /login para iniciar sesión")
         return
     login_page = session.get(f"{BASE_URL}/dataset/list")
     soup = BeautifulSoup(login_page.text, 'html.parser')
-    data = soup.find('h1', string="My datasets").find_next_sibling('div')
-    dataset_links = data.find_all('a', href=True)
-    keyboard = [
+    
+    #Sync
+    data_sync = soup.find('h1', string="My datasets").find_next_sibling('div')
+    dataset_links_sync = data_sync.find_all('a', href=True)
+    keyboard_sync = [
         [InlineKeyboardButton(link.get_text().strip(), url=str(link['href']).replace("http://localhost:5000", BASE_URL))]
-        for link in dataset_links if not link.get_text().strip().startswith("http://localhost:5000")
+        for link in dataset_links_sync if not link.get_text().strip().startswith("http://localhost:5000")
     ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    if(len(keyboard)==0):
+    reply_markup_sync = InlineKeyboardMarkup(keyboard_sync)    
+    
+    # Async
+    data_async = soup.find('h5', string="Unsynchronized datasets").find_next('table').find_all('tr')
+    keyboard_async=[]
+    for row in data_async[1:]:
+        link = row.find('a')
+        if link:
+            text = link.get_text(strip=True)
+            href = link['href']
+            keyboard_async.append([InlineKeyboardButton(text, f"{BASE_URL}{href}")])
+            
+    reply_markup_async = InlineKeyboardMarkup(keyboard_async)    
+        
+    if((len(keyboard_sync)+len(keyboard_async))==0):
         await context.bot.send_message(chat_id=update.effective_chat.id, text="No existen datasets")
-    await context.bot.send_message(chat_id=update.effective_chat.id, text="Lista de datasets:", reply_markup=reply_markup)
+    await context.bot.send_message(chat_id=update.effective_chat.id, text="Datasets sincronizados:", reply_markup=reply_markup_sync)
+    await context.bot.send_message(chat_id=update.effective_chat.id, text="Datasets no sincronizados:", reply_markup=reply_markup_async)
     
 async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_chat.id not in logged_in_users:
@@ -125,21 +148,39 @@ async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not document.file_name.endswith('.uvl'):
         await update.message.reply_text("Solo se permiten archivos con extensión .uvl. Por favor, adjunte un archivo válido.")
         return ConversationHandler.END
-    if not os.path.exists("media/" + str(update.effective_chat.id)):
-        os.makedirs("media/" + str(update.effective_chat.id))
-    file_path = os.path.join("media/" + str(update.effective_chat.id), document.file_name)
+    if not os.path.exists("telegram_bot/media/" + str(update.effective_chat.id)):
+        os.makedirs("telegram_bot/media/" + str(update.effective_chat.id))
+    file_path = os.path.join("telegram_bot/media/" + str(update.effective_chat.id), document.file_name)
     
     file = await document.get_file()
     await file.download_to_drive(file_path)
-    
     context.user_data['file_path'] = file_path
-    
-    await update.message.reply_text(f"Archivo '{document.file_name}' descargado correctamente.")
-    await update.message.reply_text(f"Se han subido un total de {len(os.listdir("media/" + str(update.effective_chat.id)))} archivos.")
-    
+
+    total_files = len(os.listdir("telegram_bot/media/" + str(update.effective_chat.id)))
+    await update.message.reply_text(f"Se han subido un total de {total_files} archivos.")
+
+    try:
+        with open(file_path, "rb") as f:
+            files = {
+                "file": (document.file_name, f, "application/octet-stream")
+            }
+            response = session.post(
+                f"{BASE_URL}/dataset/file/upload",
+                data={"csrf_token": csrf_token},
+                files=files
+            )
+        
+        if response.status_code == 200:
+            await update.message.reply_text(f"Archivo '{document.file_name}' subido exitosamente a Uvlhub.")
+        else:
+            await update.message.reply_text(f"Error al subir el archivo a Uvlhub: {response.status_code}\n{response.text}")
+    except Exception as e:
+        await update.message.reply_text(f"Error durante la subida del archivo: {str(e)}")
+            
 async def upload(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not os.path.exists("media/" + str(update.effective_chat.id)) or len(os.listdir("media/" + str(update.effective_chat.id)))<1:
+    if not os.path.exists("telegram_bot/media/" + str(update.effective_chat.id)) or len(os.listdir("telegram_bot/media/" + str(update.effective_chat.id)))<1:
         await context.bot.send_message(chat_id=update.effective_chat.id, text="Debes adjuntar primero uno o varios archivos")
+        await context.bot.send_message(chat_id=update.effective_chat.id, text="Si no tienes archivos .uvl, puedes descargarte uno usando /test")
         return
     await context.bot.send_message(chat_id=update.effective_chat.id, text="Escriba el título del dataset")
     return TITLE
@@ -178,7 +219,7 @@ async def doi(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def tags(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['tags'] = update.message.text.split(',')
-    archives = "\n".join(f"- {archivo}" for archivo in os.listdir("media/" + str(update.effective_chat.id)))
+    archives = "\n".join(f"- {archivo}" for archivo in os.listdir("telegram_bot/media/" + str(update.effective_chat.id)))
     
     await update.message.reply_text(f"Datos recopilados:\n"
                                   f"Título: {context.user_data['title']}\n"
@@ -208,25 +249,24 @@ async def confirmation(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "csrf_token": csrf_token,
             "title": context.user_data['title'],
             "desc": context.user_data['description'],
-            "publication_type": str(context.user_data['publication_type']).replace("_", " ").lower( ),
+            "publication_type": str(context.user_data['publication_type']).replace("_", "").replace(" ","").lower(),
             "publication_doi": "",
             "tags": ','.join(context.user_data['tags']),
-            "feature_models-0-uvl_filename": os.listdir("media/" + str(update.effective_chat.id))[0],
-            'feature_models-0-title': '',  # Campo vacío según el ejemplo
-            'feature_models-0-desc': '',  # Campo vacío según el ejemplo
-            'feature_models-0-publication_type': 'none',
-            'feature_models-0-publication_doi': '',
-            'feature_models-0-tags': '',
-            'feature_models-0-uvl_version': '',
-            "authors-0-name": "Author Name",
         }
         
-        files = [
-            ('feature_models-0-file', open(os.path.join("media/" + str(update.effective_chat.id), archivo), 'rb'))
-            for archivo in os.listdir("media/" + str(update.effective_chat.id))
-        ]
-        print(files)
-        response = session.post(f"{BASE_URL}/dataset/upload", data=data, files=files)
+        user_dir = os.path.join("media", str(update.effective_chat.id))
+        file_list = os.listdir(user_dir)
+        
+        for i, file_name in enumerate(file_list):
+            data[f"feature_models-{i}-uvl_filename"] = file_name
+            data[f"feature_models-{i}-title"] = ''
+            data[f"feature_models-{i}-desc"] = ''
+            data[f"feature_models-{i}-publication_type"] = str(context.user_data['publication_type']).replace("_", "").replace(" ","").lower()
+            data[f"feature_models-{i}-publication_doi"] = ''
+            data[f"feature_models-{i}-tags"] = ','.join(context.user_data['tags'])
+            data[f"feature_models-{i}-uvl_version"] = ''
+        
+        response = session.post(f"{BASE_URL}/dataset/upload", data=data)
 
         if response.status_code == 200:
             await query.edit_message_text("Dataset subido exitosamente a Uvlhub.")
@@ -234,9 +274,6 @@ async def confirmation(update: Update, context: ContextTypes.DEFAULT_TYPE):
             print(response.json())
             await query.edit_message_text(f"Error en la subida: {response.json().get('message', 'Error desconocido')}")
         
-        for _, file_obj in files:
-            file_obj.close()
-
     elif query.data == "cancel_upload":
         await query.edit_message_text("Subida del dataset cancelada.")
 
@@ -257,6 +294,7 @@ async def help(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "Para empezar con el proceso de subida, adjunta los archivos en formato .uvl y luego envía el comando /upload.\n"
         "/upload - Sube los archivos adjuntados a Uvlhub\n"
         "/test - Descarga un archivo .uvl de prueba.\n"
+        "/cancel - Cancela el proceso de subida.\n"
         "/help - Muestra esta lista de comandos.\n"
         
     )
