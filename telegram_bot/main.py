@@ -61,7 +61,8 @@ def is_valid_email(email: str) -> bool:
     return re.match(regex, email) is not None
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await context.bot.send_message(chat_id=update.effective_chat.id, text="Bienvenido al bot de Uvlhub. Usa /login para iniciar sesión")
+    await context.bot.send_message(chat_id=update.effective_chat.id, text="Bienvenido al bot de Uvlhub")
+    await context.bot.send_message(chat_id=update.effective_chat.id, text="Usa /help para ver la lista de comandos o /login para iniciar sesión")
 
 async def login(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_chat.id in logged_in_users:
@@ -253,8 +254,8 @@ async def confirmation(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "publication_doi": "",
             "tags": ','.join(context.user_data['tags']),
         }
-        
-        user_dir = os.path.join("media", str(update.effective_chat.id))
+                
+        user_dir = os.path.join("telegram_bot/media", str(update.effective_chat.id))
         file_list = os.listdir(user_dir)
         
         for i, file_name in enumerate(file_list):
@@ -270,6 +271,8 @@ async def confirmation(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         if response.status_code == 200:
             await query.edit_message_text("Dataset subido exitosamente a Uvlhub.")
+            await context.bot.send_message(chat_id=update.effective_chat.id, text="Para ver el dataset, use /myDatasets")
+
         else:
             print(response.json())
             await query.edit_message_text(f"Error en la subida: {response.json().get('message', 'Error desconocido')}")
@@ -281,7 +284,7 @@ async def confirmation(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def test(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    file_path = "media/prueba.uvl"
+    file_path = "telegram_bot/media/prueba.uvl"
     
     await context.bot.send_document(chat_id=update.effective_chat.id, document=open(file_path, 'rb'))
 
