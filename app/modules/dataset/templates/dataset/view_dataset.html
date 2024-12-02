@@ -330,7 +330,32 @@
             <i data-feather="download" class="center-button-icon"></i>
             Download all ({{ dataset.get_file_total_size_for_human() }})
         </a>
+        <div class="btn-group" role="group">
+            <button id="btnGroupDonwloadAll" type="button" class="btn btn-primary mt-3 dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" style=" border-radius: 5px;">
+                <i data-feather="download"></i> Donwload All
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="btnGroupDownloadAll">
+                <li>
+                    <a class="dropdown-item" href="/dataset/download_Glencoe/{{ dataset.id }}">
+                        Glencoe
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item" href="/dataset/download_DIMACS/{{ dataset.id }}">
+                        DIMACS
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item" href="/dataset/download_Splot/{{ dataset.id }}">
+                        SPLOT
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div class="dropdown mt-3"></div>
     </div>
+    <div class="dropdown mt-3"></div>
+    <div class="dropdown mt-3"></div>
     
 </div>
 
