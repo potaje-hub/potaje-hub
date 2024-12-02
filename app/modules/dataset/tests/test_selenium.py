@@ -111,7 +111,7 @@ def test_upload_dataset():
         check = driver.find_element(By.ID, "agreeCheckbox")
         check.send_keys(Keys.SPACE)
         wait_for_page_to_load(driver)
-        time.sleep(5)  # Force wait time  
+        time.sleep(5)  # Force wait time
 
         upload_btn = driver.find_element(By.ID, "upload_button")
         upload_btn.send_keys(Keys.RETURN)
@@ -129,11 +129,11 @@ def test_upload_dataset():
 
         # Close the browser
         close_driver(driver)
-        
-        
+
+
 def test_download_dataset_glencoe():
     driver = initialize_driver()
-    
+
     try:
         host = get_host_for_selenium_testing()
 
@@ -155,17 +155,17 @@ def test_download_dataset_glencoe():
         # Open the dataset list page
         driver.get(f"{host}/dataset/list")
         wait_for_page_to_load(driver)
-            
+
         # Click on the first dataset in the list
         first_dataset = driver.find_element(By.XPATH, "//table//tbody//tr[1]//td[1]//a")
         first_dataset.click()
         wait_for_page_to_load(driver)
 
         # Click the dropdown to reveal the download all button
-            
+
         dropdown = driver.find_element(By.ID, "btnGroupDonwloadAll")
         driver.execute_script("arguments[0].click();", dropdown)
-        
+
         wait_for_page_to_load(driver)
 
         download_all_button = driver.find_element(By.ID, "download-glencoe")
@@ -178,11 +178,11 @@ def test_download_dataset_glencoe():
     finally:
         # Close the browser
         close_driver(driver)
- 
- 
+
+
 def test_download_dataset_DIMACS():
     driver = initialize_driver()
-    
+
     try:
         host = get_host_for_selenium_testing()
 
@@ -204,34 +204,33 @@ def test_download_dataset_DIMACS():
         # Open the dataset list page
         driver.get(f"{host}/dataset/list")
         wait_for_page_to_load(driver)
-            
+
         # Click on the first dataset in the list
         first_dataset = driver.find_element(By.XPATH, "//table//tbody//tr[1]//td[1]//a")
         first_dataset.click()
         wait_for_page_to_load(driver)
 
         # Click the dropdown to reveal the download all button
-            
+
         dropdown = driver.find_element(By.ID, "btnGroupDonwloadAll")
         driver.execute_script("arguments[0].click();", dropdown)
-        
+
         wait_for_page_to_load(driver)
 
         download_all_button = driver.find_element(By.ID, "download-DIMACS")
         driver.execute_script("arguments[0].click();", download_all_button)
         wait_for_page_to_load(driver)
         time.sleep(2)  # Force wait time
-        
         print("Download all datasets test passed!")
 
     finally:
         # Close the browser
-        close_driver(driver)        
+        close_driver(driver)
 
 
 def test_download_dataset_splot():
     driver = initialize_driver()
-    
+
     try:
         host = get_host_for_selenium_testing()
 
@@ -253,24 +252,24 @@ def test_download_dataset_splot():
         # Open the dataset list page
         driver.get(f"{host}/dataset/list")
         wait_for_page_to_load(driver)
-            
+
         # Click on the first dataset in the list
         first_dataset = driver.find_element(By.XPATH, "//table//tbody//tr[1]//td[1]//a")
         first_dataset.click()
         wait_for_page_to_load(driver)
 
         # Click the dropdown to reveal the download all button
-            
+
         dropdown = driver.find_element(By.ID, "btnGroupDonwloadAll")
         driver.execute_script("arguments[0].click();", dropdown)
-        
+
         wait_for_page_to_load(driver)
 
         download_all_button = driver.find_element(By.ID, "download-splot")
         driver.execute_script("arguments[0].click();", download_all_button)
         wait_for_page_to_load(driver)
         time.sleep(2)  # Force wait time
-        
+
         print("Download all datasets test passed!")
 
     finally:
@@ -283,4 +282,3 @@ test_upload_dataset()
 test_download_dataset_glencoe()
 test_download_dataset_DIMACS()
 test_download_dataset_splot()
-
