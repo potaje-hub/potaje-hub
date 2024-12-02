@@ -26,8 +26,8 @@ class ZenodoService(BaseService):
         FLASK_ENV = os.getenv("FLASK_ENV", "development")
         ZENODO_API_URL = ""
 
-        LOCAL_SERVER = os.getenv("DOMAIN", "localhost:5000")
-        development_url = f"http://{LOCAL_SERVER}/fakenodo/deposit/depositions"
+        LOCAL_SERVER = os.getenv("DOMAIN", "localhost")
+        development_url = f"http://{LOCAL_SERVER}:5000/fakenodo/deposit/depositions"
 
         if FLASK_ENV == "development":
             #ZENODO_API_URL = os.getenv("ZENODO_API_URL", "https://sandbox.zenodo.org/api/deposit/depositions")
