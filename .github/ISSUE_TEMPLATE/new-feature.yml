@@ -20,7 +20,7 @@ body:
       description: "Provide an example use case or situation where this feature would be useful."
       placeholder: "Describe how you would use this feature..."
 
-  - type: select
+  - type: dropdown
     attributes:
       label: Is this feature critical?
       description: "Select if this feature is critical to the user experience."
