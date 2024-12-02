@@ -279,8 +279,8 @@ def test_download_dataset_splot():
 
 
 # Call the test function
-#test_upload_dataset()
-#test_download_dataset_glencoe()
-#test_download_dataset_DIMACS()
+test_upload_dataset()
+test_download_dataset_glencoe()
+test_download_dataset_DIMACS()
 test_download_dataset_splot()
 
