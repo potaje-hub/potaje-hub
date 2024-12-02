@@ -1,9 +1,9 @@
 services:
   web:
     container_name: web_app_container
-    image: drorganvidez/uvlhub:dev
+    image: potaje-hub:dev
     env_file:
-      - ../.env
+      - ../.env.docker.example
     expose:
       - "5000"
     depends_on:
@@ -21,7 +21,7 @@ services:
   db:
     container_name: mariadb_container
     env_file:
-      - ../.env
+      - ../.env.docker.example
     build:
       context: ../
       dockerfile: docker/images/Dockerfile.mariadb
