@@ -131,7 +131,7 @@ def test_upload_dataset():
         close_driver(driver)
         
         
-def test_download_dataset():
+def test_download_dataset_glencoe():
     driver = initialize_driver()
     
     try:
@@ -161,7 +161,6 @@ def test_download_dataset():
         first_dataset.click()
         wait_for_page_to_load(driver)
 
-        # Find and click the download all button
         # Click the dropdown to reveal the download all button
             
         dropdown = driver.find_element(By.ID, "btnGroupDonwloadAll")
