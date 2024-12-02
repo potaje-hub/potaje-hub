@@ -20,10 +20,10 @@ body:
       description: "Provide an example use case or situation where this feature would be useful."
       placeholder: "Describe how you would use this feature..."
 
-  - type: checkbox
+  - type: select
     attributes:
       label: Is this feature critical?
-      description: "Check if this feature is critical to the user experience."
+      description: "Select if this feature is critical to the user experience."
       options:
         - "Yes"
         - "No"
