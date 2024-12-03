@@ -26,4 +26,5 @@ jobs:
 
     - name: Run Flake8
       run: |
-        flake8 . --max-line-length=200 --exclude=.git,__pycache__
+      
+        flake8 . --max-line-length=200 --exclude=.git,__pycache__,migrations
