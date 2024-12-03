@@ -6,6 +6,7 @@ from app.modules.auth.models import User
 from app.modules.profile.models import UserProfile
 from flask_login import current_user
 
+
 @pytest.fixture(scope="module")
 def test_client(test_client):
     """
@@ -51,6 +52,7 @@ def test_get_notepad(test_client):
 
     logout(test_client)
 
+
 def test_edit_notepad(test_client):
     """
     Test editing a notepad via POST request.
@@ -86,6 +88,7 @@ def test_edit_notepad(test_client):
         assert notepad.body == 'This is the edited body of notepad3.', "The notepad body was not updated."
 
     logout(test_client)
+
 
 def test_delete_notepad(test_client):
     """
