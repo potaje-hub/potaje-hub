@@ -7,7 +7,7 @@ import uuid
 from datetime import datetime, timezone
 from zipfile import ZipFile
 from app.modules.flamapy.routes import to_cnf_file, to_glencoe_file, to_splot_file
-from app.modules.hubfile.services import HubfileService 
+from app.modules.hubfile.services import HubfileService
 
 
 from flask import (
@@ -261,13 +261,13 @@ def download_DIMACS(dataset_id):
                 relative_path = os.path.relpath(full_path, file_path)
 
                 # Obtén el file_id a partir del nombre del archivo
-                
+
                 hubfile_service = HubfileService()
                 file_id = hubfile_service.get_file_id_by_name(file)
 
                 dimacs_file = to_cnf_file(file_id)
                 # Obtencion del contenido de la respuesta
-                
+
                 zipf.write(dimacs_file, arcname=f"{relative_path}-dimacs.txt")
 
     resp = send_file(zip_path, as_attachment=True, download_name=f'dataset_{dataset_id}_DIMACS.zip',
@@ -311,13 +311,13 @@ def download_Glencoe(dataset_id):
                 relative_path = os.path.relpath(full_path, file_path)
 
                 # Obtén el file_id a partir del nombre del archivo
-                
+
                 hubfile_service = HubfileService()
                 file_id = hubfile_service.get_file_id_by_name(file)
 
                 glencoe_file = to_glencoe_file(file_id)
                 # Obtencion del contenido de la respuesta
-                
+
                 zipf.write(glencoe_file, arcname=f"{relative_path}-glencoe.txt")
 
     resp = send_file(zip_path, as_attachment=True, download_name=f'dataset_{dataset_id}_GLENCOE.zip',
@@ -361,13 +361,13 @@ def download_Splot(dataset_id):
                 relative_path = os.path.relpath(full_path, file_path)
 
                 # Obtén el file_id a partir del nombre del archivo
-                
+
                 hubfile_service = HubfileService()
                 file_id = hubfile_service.get_file_id_by_name(file)
 
                 splot_file = to_splot_file(file_id)
                 # Obtencion del contenido de la respuesta
-                
+
                 zipf.write(splot_file, arcname=f"{relative_path}-splot.txt")
 
     resp = send_file(zip_path, as_attachment=True, download_name=f'dataset_{dataset_id}_SPLOT.zip',
@@ -394,7 +394,7 @@ def download_Splot(dataset_id):
 
     return resp
 
-   
+
 @dataset_bp.route("/doi/<path:doi>/", methods=["GET"])
 def subdomain_index(doi):
 
