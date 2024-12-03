@@ -1,8 +1,6 @@
 import pytest
 from unittest.mock import patch, MagicMock
 from app.modules.notepad.services import NotepadService
-from app.modules.notepad.models import Notepad
-from app.modules.auth.models import User
 
 
 @pytest.fixture(scope="module")
@@ -15,7 +13,7 @@ def test_client(test_client):
         # DO NOT FORGET to use db.session.add(<element>) and db.session.commit() to save the data.
         pass
     yield test_client
-    
+
 
 @pytest.fixture
 def notepad_service():
@@ -33,7 +31,7 @@ def test_get_all_by_user(notepad_service):
         assert result == mock_notepads
         assert len(result) == 2
         mock_get_all.assert_called_once_with(user_id)
-        
+
 
 def test_create(notepad_service):
     with patch.object(notepad_service.repository, 'create') as mock_create:
