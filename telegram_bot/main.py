@@ -6,6 +6,11 @@ from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, Messa
 import requests
 from bs4 import BeautifulSoup
 import re
+
+import sys
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
+
 from app.modules.dataset.services import DataSetService
 
 
@@ -274,7 +279,6 @@ async def confirmation(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await context.bot.send_message(chat_id=update.effective_chat.id, text="Para ver el dataset, use /myDatasets")
 
         else:
-            print(response.json())
             await query.edit_message_text(f"Error en la subida: {response.json().get('message', 'Error desconocido')}")
         
     elif query.data == "cancel_upload":
