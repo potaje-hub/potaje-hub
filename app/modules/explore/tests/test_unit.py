@@ -80,7 +80,7 @@ def test_negative_get_all_by_num_of_features(explore_service):
         mock_get_all.assert_called_once_with('', 'newest', 'any', None, 31, [])
         
         
-def test_negative_get_all_by_num_of_features_and_models(explore_service):
+def test_negative_get_all_by_num_of_features_and_models_wrong_models(explore_service):
     with patch.object(explore_service.repository, 'filter') as mock_get_all:
         mock_explore = []
         mock_get_all.return_value = mock_explore
@@ -91,7 +91,7 @@ def test_negative_get_all_by_num_of_features_and_models(explore_service):
         assert len(result) == 0
         mock_get_all.assert_called_once_with('', 'newest', 'any', 3, 50, [])   
         
-def test_negative_get_all_by_num_of_features_and_models(explore_service):
+def test_negative_get_all_by_num_of_features_and_models_wrong_features(explore_service):
     with patch.object(explore_service.repository, 'filter') as mock_get_all:
         mock_explore = []
         mock_get_all.return_value = mock_explore
