@@ -86,6 +86,19 @@ def to_glencoe(file_id):
         os.remove(temp_file.name)
 
 
+def to_glencoe_file(file_id):
+    temp_file = tempfile.NamedTemporaryFile(suffix='.json', delete=False)
+    try:
+        hubfile = HubfileService().get_or_404(file_id)
+        fm = UVLReader(hubfile.get_path()).transform()
+        GlencoeWriter(temp_file.name, fm).transform()
+
+        # Return the file in the response
+        return temp_file.name
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 @flamapy_bp.route('/flamapy/to_splot/<int:file_id>', methods=['GET'])
 def to_splot(file_id):
     temp_file = tempfile.NamedTemporaryFile(suffix='.splx', delete=False)
@@ -99,6 +112,19 @@ def to_splot(file_id):
     finally:
         # Clean up the temporary file
         os.remove(temp_file.name)
+
+
+def to_splot_file(file_id):
+    temp_file = tempfile.NamedTemporaryFile(suffix='.splx', delete=False)
+    try:
+        hubfile = HubfileService().get_by_id(file_id)
+        fm = UVLReader(hubfile.get_path()).transform()
+        SPLOTWriter(temp_file.name, fm).transform()
+
+        # Return the file in the response
+        return temp_file.name
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 @flamapy_bp.route('/flamapy/to_cnf/<int:file_id>', methods=['GET'])
@@ -115,3 +141,18 @@ def to_cnf(file_id):
     finally:
         # Clean up the temporary file
         os.remove(temp_file.name)
+
+
+def to_cnf_file(file_id):
+    temp_file = tempfile.NamedTemporaryFile(suffix='.cnf', delete=False)
+    try:
+        hubfile = HubfileService().get_by_id(file_id)
+        fm = UVLReader(hubfile.get_path()).transform()
+        sat = FmToPysat(fm).transform()
+        DimacsWriter(temp_file.name, sat).transform()
+
+        # Return the file in the response
+
+        return temp_file.name
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
