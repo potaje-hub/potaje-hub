@@ -371,7 +371,6 @@ if __name__ == '__main__':
         },
         fallbacks=[CommandHandler('cancel', cancel)],
     )
-
     document_handler = MessageHandler(filters.Document.ALL, handle_document)
     conversation_handler = ConversationHandler(
         entry_points=[CommandHandler('upload', upload)],
