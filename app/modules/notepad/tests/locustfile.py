@@ -1,6 +1,7 @@
 from locust import HttpUser, task, between
 import random
 
+
 class NotepadUser(HttpUser):
     wait_time = between(1, 5)
 
@@ -49,4 +50,3 @@ class NotepadUser(HttpUser):
     def on_stop(self):
         # Logout at the end of each simulated user session
         self.client.get("/logout")
-
