@@ -36,6 +36,13 @@ class HubfileService(BaseService):
 
         return path
 
+    def get_file_id_by_name(self, file_name: str) -> int:
+        hubfile = self.repository.get_by_name(file_name)
+        if hubfile:
+            return hubfile.id
+        else:
+            raise ValueError("Hubfile not found for the given name")
+
     def total_hubfile_views(self) -> int:
         return self.hubfile_view_record_repository.total_hubfile_views()
 
