@@ -131,7 +131,7 @@ def test_upload_dataset():
         close_driver(driver)
 
 
-def test_download_dataset():
+def test_download_all_datasets_splot():
     driver = initialize_driver()
 
     try:
