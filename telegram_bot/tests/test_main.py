@@ -1,23 +1,24 @@
 
 import pytest
 from unittest.mock import AsyncMock, patch, MagicMock
-from telegram import Update, InlineKeyboardButton, Message, Chat, User
-from telegram.ext import ContextTypes
+from telegram import Update, Message, Chat, User  # type: ignore
+from telegram.ext import ContextTypes  # type: ignore
 import sys
 import os
+from telegram_bot.main import (
+    start, login, is_valid_email, logout,
+    handle_document, login_to_portal, test
+)
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 
-from telegram_bot.main import (
-    start, login, is_valid_email, email, password, cancel, logout,
-    handle_document, my_datasets, login_to_portal, test, logged_in_users
-)
 
 @pytest.fixture
 def context():
     mock_context = AsyncMock(spec=ContextTypes.DEFAULT_TYPE)
     mock_context.bot.send_message = AsyncMock()  # Mock de send_message
     return mock_context
+
 
 @pytest.mark.asyncio
 async def test_start():
@@ -36,6 +37,7 @@ async def test_start():
         chat_id=12345, text="Usa /help para ver la lista de comandos o /login para iniciar sesión"
     )
 
+
 @pytest.mark.asyncio
 async def test_login():
     mock_update = AsyncMock(spec=Update)
@@ -51,10 +53,12 @@ async def test_login():
     )
     assert result == 0  # EMAIL constant
 
+
 def test_is_valid_email():
-    assert is_valid_email("test@example.com") == True
-    assert is_valid_email("invalid-email") == False
-    assert is_valid_email("another.test@domain.org") == True
+    assert is_valid_email("test@example.com")
+    assert not is_valid_email("invalid-email")
+    assert is_valid_email("another.test@domain.org")
+
 
 @patch('requests.Session')
 def test_login_to_portal(mock_session):
@@ -71,7 +75,8 @@ def test_login_to_portal(mock_session):
     email = "test@example.com"
     password = "password123"
 
-    assert login_to_portal(session, base_url, email, password) == False
+    assert not login_to_portal(session, base_url, email, password)
+
 
 @pytest.mark.asyncio
 async def test_logout():
@@ -89,6 +94,7 @@ async def test_logout():
         chat_id=12345, text="Sesión cerrada correctamente."
     )
 
+
 @pytest.fixture
 def update():
     mock_update = MagicMock(spec=Update)
@@ -100,6 +106,7 @@ def update():
     mock_update.message.chat = mock_update.effective_chat
     mock_update.message.from_user = MagicMock(spec=User)  # Mock del usuario
     return mock_update
+
 
 @pytest.mark.asyncio
 async def test_handle_document():
@@ -116,7 +123,7 @@ async def test_handle_document():
         chat_id=12345, text="Debe iniciar sesión para subir archivos a Uvlhub."
     )
 
-    
+
 @pytest.mark.asyncio
 async def test_test_command():
     mock_update = AsyncMock(spec=Update)
