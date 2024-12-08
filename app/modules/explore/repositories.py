@@ -10,7 +10,8 @@ class ExploreRepository(BaseRepository):
     def __init__(self):
         super().__init__(DataSet)
 
-    def filter(self, query="", sorting="newest", publication_type="any", number_of_models = None, number_of_features = None, tags=[], **kwargs):
+    def filter(self, query="", sorting="newest", publication_type="any", number_of_models=None, number_of_features=None,
+               tags=[], **kwargs):
         # Normalize and remove unwanted characters
         normalized_query = unidecode.unidecode(query).lower()
         cleaned_query = re.sub(r'[,.":\'()\[\]^;!¡¿?]', "", normalized_query)
@@ -31,7 +32,7 @@ class ExploreRepository(BaseRepository):
         metrics_filters = []
         if (number_of_features):
             metrics_filters.append(DSMetrics.number_of_features == number_of_features)
-        
+
         if (number_of_models):
             metrics_filters.append(DSMetrics.number_of_models == number_of_models)
 

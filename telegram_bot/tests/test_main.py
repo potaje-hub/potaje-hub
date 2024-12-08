@@ -1,4 +1,3 @@
-
 import pytest
 from unittest.mock import AsyncMock, patch, MagicMock
 from telegram import Update, Message, Chat, User  # type: ignore
