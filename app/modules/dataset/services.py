@@ -88,7 +88,7 @@ class DataSetService(BaseService):
 
     def total_dataset_downloads(self) -> int:
         return self.dsdownloadrecord_repository.total_dataset_downloads()
-    
+
     def get_all_datasets(self):
         return self.repository.get_all_datasets()
 
