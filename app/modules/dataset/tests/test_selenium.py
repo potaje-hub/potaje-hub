@@ -277,10 +277,44 @@ def test_download_dataset_splot():
         close_driver(driver)
 
 
+def test_download_all_datasets():
+    driver = initialize_driver()
+
+    try:
+        host = get_host_for_selenium_testing()
+
+        # Open the login page
+        driver.get(f"{host}/login")
+        wait_for_page_to_load(driver)
+
+        # Find the username and password field and enter the values
+        email_field = driver.find_element(By.NAME, "email")
+        password_field = driver.find_element(By.NAME, "password")
+
+        email_field.send_keys("user1@example.com")
+        password_field.send_keys("1234")
+
+        # Send the form
+        password_field.send_keys(Keys.RETURN)
+        wait_for_page_to_load(driver)
+
+        button = driver.find_element(By.ID, "downloadAll")
+        driver.execute_script("arguments[0].click();", button)
+
+        wait_for_page_to_load(driver)
+        time.sleep(2)  # Force wait time
+
+        print("Download all datasets test passed!")
+
+    finally:
+        # Close the browser
+        close_driver(driver)
+
+
 # Call the test function
 
-
 test_upload_dataset()
+test_download_all_datasets()
 test_download_dataset_glencoe()
 test_download_dataset_DIMACS()
 test_download_dataset_splot()
