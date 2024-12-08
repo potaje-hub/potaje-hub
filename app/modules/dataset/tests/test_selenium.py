@@ -131,11 +131,7 @@ def test_upload_dataset():
         close_driver(driver)
 
 
-<<<<<<< HEAD
 def test_download_dataset_glencoe():
-=======
-def test_download_all_datasets_splot():
->>>>>>> main
     driver = initialize_driver()
 
     try:
@@ -156,7 +152,6 @@ def test_download_all_datasets_splot():
         password_field.send_keys(Keys.RETURN)
         wait_for_page_to_load(driver)
 
-<<<<<<< HEAD
         # Open the dataset list page
         driver.get(f"{host}/dataset/list")
         wait_for_page_to_load(driver)
@@ -175,11 +170,6 @@ def test_download_all_datasets_splot():
 
         download_all_button = driver.find_element(By.ID, "download-glencoe")
         driver.execute_script("arguments[0].click();", download_all_button)
-=======
-        button = driver.find_element(By.ID, "downloadAll")
-        driver.execute_script("arguments[0].click();", button)
-
->>>>>>> main
         wait_for_page_to_load(driver)
         time.sleep(2)  # Force wait time
 
@@ -189,7 +179,6 @@ def test_download_all_datasets_splot():
         # Close the browser
         close_driver(driver)
 
-<<<<<<< HEAD
 
 def test_download_dataset_DIMACS():
     driver = initialize_driver()
@@ -288,8 +277,6 @@ def test_download_dataset_splot():
         close_driver(driver)
 
 
-=======
->>>>>>> main
 # Call the test function
 
 
