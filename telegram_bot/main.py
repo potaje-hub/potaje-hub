@@ -1,8 +1,12 @@
 import logging
 import os
 import shutil
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, Document
-from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, MessageHandler, filters, ConversationHandler, CallbackQueryHandler
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, Document  # type: ignore
+from telegram.ext import (  # type: ignore
+    ApplicationBuilder, ContextTypes, CommandHandler, MessageHandler,
+    filters, ConversationHandler, CallbackQueryHandler
+)
+from app.modules.dataset.services import DataSetService
 import requests
 from bs4 import BeautifulSoup
 import re
