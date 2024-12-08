@@ -84,8 +84,8 @@ def to_glencoe(file_id):
     finally:
         # Clean up the temporary file
         os.remove(temp_file.name)
-                
-       
+
+
 def to_glencoe_file(file_id):
     temp_file = tempfile.NamedTemporaryFile(suffix='.json', delete=False)
     try:
@@ -112,8 +112,8 @@ def to_splot(file_id):
     finally:
         # Clean up the temporary file
         os.remove(temp_file.name)
-     
-        
+
+
 def to_splot_file(file_id):
     temp_file = tempfile.NamedTemporaryFile(suffix='.splx', delete=False)
     try:
@@ -152,7 +152,7 @@ def to_cnf_file(file_id):
         DimacsWriter(temp_file.name, sat).transform()
 
         # Return the file in the response
-        
+
         return temp_file.name
     except Exception as e:
         return jsonify({"error": str(e)}), 500

@@ -35,7 +35,7 @@ class HubfileService(BaseService):
                             hubfile.name)
 
         return path
-    
+
     def get_file_id_by_name(self, file_name: str) -> int:
         hubfile = self.repository.get_by_name(file_name)
         if hubfile:
