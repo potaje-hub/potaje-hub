@@ -13,7 +13,8 @@ import re
 
 import sys
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
+from app.modules.dataset.services import DataSetService
+
 
 dataset_service = DataSetService()
 
@@ -173,23 +174,33 @@ async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await context.bot.send_message(chat_id=update.effective_chat.id,
                                        text="Debe iniciar sesión para subir archivos a Uvlhub.")
         await context.bot.send_message(chat_id=update.effective_chat.id, text="Usa /login para iniciar sesión")
+        print("No estaba logueado")
         return
     document: Document = update.message.document
+    print(document)
+    print(document.file_name)
+
     if not document.file_name.endswith('.uvl'):
-        await update.message.reply_text(
-            "Solo se permiten archivos con extensión .uvl. Por favor, adjunte un archivo válido.")
+        print("No es un uvl")
+        await context.bot.send_message(chat_id=update.effective_chat.id, text="Solo se permiten archivos con extensión .uvl. Por favor, adjunte un archivo válido.")
         return ConversationHandler.END
+    
     if not os.path.exists(media_route + str(update.effective_chat.id)):
         os.makedirs(media_route + str(update.effective_chat.id))
+        
     file_path = os.path.join(media_route + str(update.effective_chat.id), document.file_name)
     
     file = await document.get_file()
+    print(f"el archivo {file} ha llegado")
+    
     await file.download_to_drive(file_path)
     context.user_data['file_path'] = file_path
+    print(f"el archivo {file} ha llegado")
+
 
     total_files = len(os.listdir(media_route + str(update.effective_chat.id)))
     await update.message.reply_text(f"Se han subido un total de {total_files} archivos.")
-
+    print(f"Se han subido un total de {total_files} archivos.")
     try:
         with open(file_path, "rb") as f:
             files = {
@@ -202,10 +213,11 @@ async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
 
         if response.status_code == 200:
+            print(f"el docuemento {document.file_name} se ha subido")
             await update.message.reply_text(f"Archivo '{document.file_name}' subido exitosamente a Uvlhub.")
         else:
-            await update.message.reply_text(
-                f"Error al subir el archivo a Uvlhub: {response.status_code}\n{response.text}")
+            print(f"Error al subir el archivo a Uvlhub: {response.status_code}\n{response.text}")
+            await update.message.reply_text(f"Error al subir el archivo a Uvlhub: {response.status_code}\n{response.text}")
     except Exception as e:
         await update.message.reply_text(f"Error durante la subida del archivo: {str(e)}")
 
