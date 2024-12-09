@@ -1,15 +1,14 @@
 
 import pytest
-from unittest.mock import AsyncMock, patch, MagicMock, ANY
-from telegram import Update, InlineKeyboardButton, Message, Chat, User
+from unittest.mock import AsyncMock, patch, MagicMock
+from telegram import Update, Message, Chat, User
 from telegram.ext import ContextTypes
-import sys
-import os
 from app.modules.telegram_bot.main import (
     start, login, is_valid_email, email, password, cancel, logout, BASE_URL,
-    handle_document, my_datasets, login_to_portal, test, logged_in_users, 
+    handle_document, login_to_portal, test, logged_in_users,
     upload, title, description, publication_type, doi, tags, confirmation
 )
+
 
 class MockFile:
     def __init__(self):
@@ -18,13 +17,15 @@ class MockFile:
 
     async def download_to_drive(self, path):
         pass
-            
+
+
 @pytest.fixture
 def context():
     mock_context = AsyncMock(spec=ContextTypes.DEFAULT_TYPE)
     mock_context.bot.send_message = AsyncMock()  # Mock de send_message
     mock_context.user_data = {}
     return mock_context
+
 
 @pytest.fixture
 def update():
@@ -43,7 +44,7 @@ def update():
 @pytest.mark.asyncio
 async def test_start(update, context):
     await start(update, context)
-    
+
     context.bot.send_message.assert_any_call(
         chat_id=12345, text="Bienvenido al bot de Uvlhub"
     )
@@ -51,30 +52,33 @@ async def test_start(update, context):
         chat_id=12345, text="Usa /help para ver la lista de comandos o /login para iniciar sesión"
     )
 
+
 @pytest.mark.asyncio
 async def test_login_flow(update, context):
     logged_in_users.clear()
 
     await login(update, context)
     context.bot.send_message.assert_any_call(chat_id=12345, text="Introduzca el correo electrónico.")
-    
+
     update.message.text = "user1@example.com"
     await email(update, context)
     context.bot.send_message.assert_any_call(chat_id=12345, text="Introduzca la contraseña.")
-    
-    assert context.user_data['email'] == "user1@example.com", f"Esperado 'user1@example.com', pero obtuvimos {context.user_data['email']}"
-    
+
+    assert context.user_data['email'] == "user1@example.com", \
+        f"Esperado 'user1@example.com', pero obtuvimos {context.user_data['email']}"
+
     update.message.text = "1234"
     await password(update, context)
     context.bot.send_message.assert_any_call(chat_id=12345, text="Login exitoso para user1@example.com.")
 
     assert 12345 in logged_in_users
-    
-            
+
+
 def test_is_valid_email():
-    assert is_valid_email("test@example.com") == True
-    assert is_valid_email("invalid-email") == False
-    assert is_valid_email("another.test@domain.org") == True
+    assert is_valid_email("test@example.com") is True
+    assert is_valid_email("invalid-email") is False
+    assert is_valid_email("another.test@domain.org") is True
+
 
 @patch('requests.Session')
 def test_login_to_portal(mock_session):
@@ -91,7 +95,8 @@ def test_login_to_portal(mock_session):
     email = "test@example.com"
     password = "password123"
 
-    assert login_to_portal(session, base_url, email, password) == False
+    assert login_to_portal(session, base_url, email, password) is False
+
 
 @pytest.mark.asyncio
 async def test_logout(context, update):
@@ -103,6 +108,7 @@ async def test_logout(context, update):
     context.bot.send_message.assert_any_call(
         chat_id=12345, text="Sesión cerrada correctamente."
     )
+
 
 @pytest.mark.asyncio
 async def test_handle_document_logged_in(update, context):
@@ -130,27 +136,31 @@ async def test_handle_document_logged_in(update, context):
             assert f"Error durante la subida del archivo: {mock_file.filename}" not in call[1]["text"]
 
     await inner()
-            
+
+
 @pytest.mark.asyncio
 async def test_handle_document_invalid_format(update, context):
     logged_in_users[12345] = "mock_session_token"
     update.message.document.file_name = "invalid_file.txt"
     await handle_document(update, context)
-    context.bot.send_message.assert_any_call(chat_id=12345, text="Solo se permiten archivos con extensión .uvl. Por favor, adjunte un archivo válido.")
+    context.bot.send_message.assert_any_call(chat_id=12345,
+                                             text="Solo se permiten archivos con extensión .uvl. "
+                                             + "Por favor, adjunte un archivo válido.")
+
 
 @pytest.mark.asyncio
 async def test_logout_not_logged_in(update, context):
     await logout(update, context)
     context.bot.send_message.assert_any_call(chat_id=12345, text="Sesión cerrada correctamente.")
-    
-    
+
+
 @pytest.mark.asyncio
 async def test_cancel_command(update, context):
     logged_in_users[12345] = "mock_session_token"
     await cancel(update, context)
     context.bot.send_message.assert_any_call(chat_id=12345, text="Acción cancelada.")
-    
-        
+
+
 @pytest.mark.asyncio
 async def test_test_command(update, context):
     update = AsyncMock(spec=Update)
@@ -167,50 +177,50 @@ async def test_test_command(update, context):
 @pytest.mark.asyncio
 async def test_upload(update, context):
     logged_in_users[12345] = "mock_session_token"
-    file_content = b"mock file content"
     update.message.document.file_id = "mock_file_id"
-    
+
     with patch('os.path.exists', return_value=True), \
          patch('os.listdir', return_value=['file1.uvl']), \
          patch('app.modules.telegram_bot.main.session.post') as mock_post:
-                     
+
         mock_post.return_value.status_code = 200
         mock_post.return_value.json.return_value = {'message': 'Success'}
-        
+
         await upload(update, context)
-                
+
         context.bot.send_message.assert_any_call(chat_id=12345, text="Escriba el título del dataset")
         update.message.text = "Título"
         await title(update, context)
 
         update.message.text = "Descripción"
         await description(update, context)
-        
-        context.bot.send_message.assert_any_call(chat_id=12345, text="¿Qué tipo de publicación es? Selecciona una opción de la lista.")
-        
+
+        context.bot.send_message.assert_any_call(chat_id=12345,
+                                                 text="¿Qué tipo de publicación es? Selecciona una opción de la lista.")
+
         valid_option = "other"
-    
+
         callback_query = MagicMock()
-        callback_query.data = valid_option 
+        callback_query.data = valid_option
         update.callback_query = callback_query
-        
+
         callback_query.answer = AsyncMock()
         callback_query.edit_message_text = AsyncMock()
-        
+
         await publication_type(update, context)
-        
+
         context.bot.send_message.assert_any_call(chat_id=12345, text="Proporcione el DOI de la publicación.")
-        
+
         update.message.text = ""
         await doi(update, context)
-        
+
         context.bot.send_message.assert_any_call(chat_id=12345, text="Indique las etiquetas separadas por comas.")
         update.message.text = "tag,test"
-        await tags(update, context)        
-        
+        await tags(update, context)
+
         callback_query.data = "confirm_upload"
-        await confirmation(update, context)        
-    
+        await confirmation(update, context)
+
         mock_post.assert_called_once_with(
             f"{BASE_URL}/dataset/upload",
             data={
@@ -221,7 +231,7 @@ async def test_upload(update, context):
                 "publication_doi": "",
                 "tags": "tag,test",
                 "feature_models-0-uvl_filename": "file1.uvl",
-                "feature_models-0-title": "", 
+                "feature_models-0-title": "",
                 "feature_models-0-desc": "",
                 "feature_models-0-publication_type": "other",
                 "feature_models-0-publication_doi": "",
@@ -229,5 +239,5 @@ async def test_upload(update, context):
                 "feature_models-0-uvl_version": ""
             }
         )
-        
+
         context.bot.send_message.assert_any_call(chat_id=12345, text="Para ver el dataset, use /myDatasets")
