@@ -168,7 +168,6 @@ async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await context.bot.send_message(chat_id=update.effective_chat.id,
                                        text="Debe iniciar sesión para subir archivos a Uvlhub.")
         await context.bot.send_message(chat_id=update.effective_chat.id, text="Usa /login para iniciar sesión")
-        print("No estaba logueado")
         return
     document: Document = update.message.document
 
@@ -186,7 +185,6 @@ async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
     file = await document.get_file()
     await file.download_to_drive(file_path)
     context.user_data['file_path'] = file_path
-    print(f"el archivo {file} ha llegado")
 
 
     total_files = len(os.listdir(media_route + str(update.effective_chat.id)))
@@ -203,11 +201,9 @@ async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
 
         if response.status_code == 200:
-            print(f"el docuemento {document.file_name} se ha subido")
             await update.message.reply_text(f"Archivo '{document.file_name}' subido exitosamente a Uvlhub.")
         else:
-            await update.message.reply_text(
-                f"Error al subir el archivo a Uvlhub: {response.status_code}\n{response.text}")
+            await update.message.reply_text(f"Error al subir el archivo a Uvlhub: {response.status_code}\n{response.text}")
     except Exception as e:
         await update.message.reply_text(f"Error durante la subida del archivo: {str(e)}")
 
@@ -246,12 +242,11 @@ async def description(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def publication_type(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     publication_type = query.data
-
-    context.user_data['publication_type'] = publication_type
-
+    
+    context.user_data['publication_type'] = publication_type    
+    
     await query.answer()
     await query.edit_message_text(f"Tipo de publicación seleccionado: {publication_type}")
-
     await context.bot.send_message(chat_id=update.effective_chat.id, text="Proporcione el DOI de la publicación.")
     return DOI
 
@@ -263,7 +258,7 @@ async def doi(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def tags(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data['tags'] = update.message.text.split(',')
+    context.user_data['tags'] = update.message.text.split(',')    
     archives = "\n".join(f"- {archivo}" for archivo in os.listdir(media_route + str(update.effective_chat.id)))
 
     await context.bot.send_message(chat_id=update.effective_chat.id,
