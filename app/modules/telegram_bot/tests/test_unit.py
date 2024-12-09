@@ -29,6 +29,7 @@ def context():
     mock_context.user_data = {}
     return mock_context
 
+
 @pytest.fixture
 def update():
     mock_update = MagicMock(spec=Update)
@@ -46,12 +47,17 @@ def update():
 @pytest.mark.asyncio
 async def test_start(update, context):
     await start(update, context)
+<<<<<<< HEAD
+=======
+
+>>>>>>> dc238f3 (refactor (telegram_bot): Flake8 code refactoring)
     context.bot.send_message.assert_any_call(
         chat_id=12345, text="Bienvenido al bot de Uvlhub"
     )
     context.bot.send_message.assert_any_call(
         chat_id=12345, text="Usa /help para ver la lista de comandos o /login para iniciar sesión"
     )
+
 
 
 @pytest.mark.asyncio

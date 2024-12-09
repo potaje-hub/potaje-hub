@@ -186,7 +186,6 @@ async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await file.download_to_drive(file_path)
     context.user_data['file_path'] = file_path
 
-
     total_files = len(os.listdir(media_route + str(update.effective_chat.id)))
     await update.message.reply_text(f"Se han subido un total de {total_files} archivos.")
     try:
@@ -203,7 +202,8 @@ async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if response.status_code == 200:
             await update.message.reply_text(f"Archivo '{document.file_name}' subido exitosamente a Uvlhub.")
         else:
-            await update.message.reply_text(f"Error al subir el archivo a Uvlhub: {response.status_code}\n{response.text}")
+            await update.message.reply_text(
+                f"Error al subir el archivo a Uvlhub: {response.status_code}\n{response.text}")
     except Exception as e:
         await update.message.reply_text(f"Error durante la subida del archivo: {str(e)}")
 
@@ -242,11 +242,15 @@ async def description(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def publication_type(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     publication_type = query.data
-    
-    context.user_data['publication_type'] = publication_type    
-    
+
+    context.user_data['publication_type'] = publication_type
+
     await query.answer()
     await query.edit_message_text(f"Tipo de publicación seleccionado: {publication_type}")
+<<<<<<< HEAD
+=======
+
+>>>>>>> dc238f3 (refactor (telegram_bot): Flake8 code refactoring)
     await context.bot.send_message(chat_id=update.effective_chat.id, text="Proporcione el DOI de la publicación.")
     return DOI
 
@@ -258,7 +262,7 @@ async def doi(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def tags(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data['tags'] = update.message.text.split(',')    
+    context.user_data['tags'] = update.message.text.split(',')
     archives = "\n".join(f"- {archivo}" for archivo in os.listdir(media_route + str(update.effective_chat.id)))
 
     await context.bot.send_message(chat_id=update.effective_chat.id,
@@ -298,6 +302,10 @@ async def confirmation(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "publication_doi": "",
             "tags": ','.join(context.user_data['tags']),
         }
+<<<<<<< HEAD
+=======
+
+>>>>>>> dc238f3 (refactor (telegram_bot): Flake8 code refactoring)
         user_dir = os.path.join(media_route, str(update.effective_chat.id))
         file_list = os.listdir(user_dir)
 
@@ -328,6 +336,10 @@ async def confirmation(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def test(update: Update, context: ContextTypes.DEFAULT_TYPE):
     file_path = media_route + "prueba.uvl"
+<<<<<<< HEAD
+=======
+
+>>>>>>> dc238f3 (refactor (telegram_bot): Flake8 code refactoring)
     await context.bot.send_document(chat_id=update.effective_chat.id, document=open(file_path, 'rb'))
 
 
