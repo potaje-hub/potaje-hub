@@ -300,7 +300,6 @@ async def confirmation(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "publication_doi": "",
             "tags": ','.join(context.user_data['tags']),
         }
-
         user_dir = os.path.join(media_route, str(update.effective_chat.id))
         file_list = os.listdir(user_dir)
 
@@ -331,7 +330,6 @@ async def confirmation(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def test(update: Update, context: ContextTypes.DEFAULT_TYPE):
     file_path = media_route + "prueba.uvl"
-
     await context.bot.send_document(chat_id=update.effective_chat.id, document=open(file_path, 'rb'))
 
 
