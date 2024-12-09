@@ -1,0 +1,23 @@
+features
+	"Movies_App" 
+		mandatory
+			"GUI" 
+				alternative
+					"Thin" 
+					"Rich" 
+		mandatory
+			"DB" 
+				alternative
+					"Local" 
+					"Remote" 
+						mandatory
+							"Cache_Policy" 
+		mandatory
+			"Network" 
+				alternative
+					"Wifi" 
+					"Bluetooth" 
+		optional
+			"GPS" 
+				optional
+					"Built-In" 
