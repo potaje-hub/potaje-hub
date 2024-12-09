@@ -15,8 +15,8 @@ app = Flask(__name__)
 # Configure Flask-Mail
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 465
-app.config['MAIL_USERNAME'] = 'dgf2020bachillerato@gmail.com'
-app.config['MAIL_PASSWORD'] = 'zamj ehxk tjsf fbup'
+app.config['MAIL_USERNAME'] = 'uvlhubio@gmail.com'
+app.config['MAIL_PASSWORD'] = 'dnal ldpl wsxp eefy'
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 
@@ -50,7 +50,7 @@ def show_signup_form():
             msg = Message(
                 'Verifique su correo',
                 sender='noreply@demo.com',
-                recipients=['dgf2020bachillerato@gmail.com'])
+                recipients=['uvlhubio@gmail.com'])
             msg.body=f'Por favor, haga clic en el siguiente enlace para verificar su correo:{confirm_url}'
 
             # Send the email
