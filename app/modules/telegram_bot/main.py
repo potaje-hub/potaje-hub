@@ -8,7 +8,7 @@ import requests
 from bs4 import BeautifulSoup
 import re
 from app.modules.dataset.services import DataSetService
-
+from decouple import config
 
 dataset_service = DataSetService()
 
@@ -36,7 +36,7 @@ def login_to_portal(session, base_url, email, password):
     return True
 
 
-TOKEN = '7318289178:AAGlwhBrbP-6RVSpx67k-B1izPLZYMIrRO0'
+TOKEN = config('TELEGRAM_BOT_TOKEN')
 BASE_URL = "http://127.0.0.1:5000"
 # BASE_URL = "https://www.uvlhub.io"
 # BASE_URL = "https://fa09-193-147-173-132.ngrok-free.app"
