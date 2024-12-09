@@ -10,8 +10,8 @@ def test_client(test_client):
     """
     with test_client.application.app_context():
         # Verify user
-        token = AuthenticationService().get_token_from_email("test@example.com")
-        AuthenticationService().confirm_user_with_token(token)
+        token = AuthenticationService().generate_confirmation_token("test@example.com")
+        AuthenticationService().confirm_token(token)
 
     yield test_client
 
