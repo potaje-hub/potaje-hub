@@ -1,18 +1,12 @@
 import logging
 import os
 import shutil
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, Document  # type: ignore
-from telegram.ext import (  # type: ignore
-    ApplicationBuilder, ContextTypes, CommandHandler, MessageHandler,
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, Document
+from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, MessageHandler, \
     filters, ConversationHandler, CallbackQueryHandler
-)
-from app.modules.dataset.services import DataSetService
 import requests
 from bs4 import BeautifulSoup
 import re
-
-import sys
-
 from app.modules.dataset.services import DataSetService
 
 
@@ -163,10 +157,10 @@ async def my_datasets(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if ((len(keyboard_sync)+len(keyboard_async)) == 0):
         await context.bot.send_message(chat_id=update.effective_chat.id, text="No existen datasets")
-    await context.bot.send_message(chat_id=update.effective_chat.id, text="Datasets sincronizados:",
-                                   reply_markup=reply_markup_sync)
-    await context.bot.send_message(chat_id=update.effective_chat.id, text="Datasets no sincronizados:",
-                                   reply_markup=reply_markup_async)
+    await context.bot.send_message(chat_id=update.effective_chat.id,
+                                   text="Datasets sincronizados:", reply_markup=reply_markup_sync)
+    await context.bot.send_message(chat_id=update.effective_chat.id,
+                                   text="Datasets no sincronizados:", reply_markup=reply_markup_async)
 
 
 async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -176,21 +170,22 @@ async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await context.bot.send_message(chat_id=update.effective_chat.id, text="Usa /login para iniciar sesión")
         return
     document: Document = update.message.document
-    
+
     if not document.file_name.endswith('.uvl'):
-        await context.bot.send_message(chat_id=update.effective_chat.id, text="Solo se permiten archivos con extensión .uvl. Por favor, adjunte un archivo válido.")
+        await context.bot.send_message(chat_id=update.effective_chat.id,
+                                       text="Solo se permiten archivos con extensión .uvl. "
+                                       + "Por favor, adjunte un archivo válido.")
         return ConversationHandler.END
-    
+
     if not os.path.exists(media_route + str(update.effective_chat.id)):
         os.makedirs(media_route + str(update.effective_chat.id))
-        
+
     file_path = os.path.join(media_route + str(update.effective_chat.id), document.file_name)
-    
+
     file = await document.get_file()
-    
+
     await file.download_to_drive(file_path)
     context.user_data['file_path'] = file_path
-
 
     total_files = len(os.listdir(media_route + str(update.effective_chat.id)))
     await update.message.reply_text(f"Se han subido un total de {total_files} archivos.")
@@ -208,15 +203,19 @@ async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if response.status_code == 200:
             await update.message.reply_text(f"Archivo '{document.file_name}' subido exitosamente a Uvlhub.")
         else:
-            await update.message.reply_text(f"Error al subir el archivo a Uvlhub: {response.status_code}\n{response.text}")
+            await update.message.reply_text(
+                f"Error al subir el archivo a Uvlhub: {response.status_code}\n{response.text}")
     except Exception as e:
         await update.message.reply_text(f"Error durante la subida del archivo: {str(e)}")
 
 
 async def upload(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not os.path.exists(media_route + str(update.effective_chat.id)) or len(os.listdir(media_route + str(update.effective_chat.id)))<1:
-        await context.bot.send_message(chat_id=update.effective_chat.id, text="Debes adjuntar primero uno o varios archivos")
-        await context.bot.send_message(chat_id=update.effective_chat.id, text="Si no tienes archivos .uvl, puedes descargarte uno usando /test")
+    if not os.path.exists(media_route + str(update.effective_chat.id)) or \
+            len(os.listdir(media_route + str(update.effective_chat.id))) < 1:
+        await context.bot.send_message(chat_id=update.effective_chat.id,
+                                       text="Debes adjuntar primero uno o varios archivos")
+        await context.bot.send_message(chat_id=update.effective_chat.id,
+                                       text="Si no tienes archivos .uvl, puedes descargarte uno usando /test")
         return
     await context.bot.send_message(chat_id=update.effective_chat.id, text="Escriba el título del dataset")
     return TITLE
@@ -230,24 +229,26 @@ async def title(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def description(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['description'] = update.message.text
-    await context.bot.send_message(chat_id=update.effective_chat.id, text="¿Qué tipo de publicación es? Selecciona una opción de la lista.")
-    
+    await context.bot.send_message(chat_id=update.effective_chat.id,
+                                   text="¿Qué tipo de publicación es? Selecciona una opción de la lista.")
+
     keyboard = [[InlineKeyboardButton(option, callback_data=option)] for option in VALID_PUBLICATION_TYPES]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    
-    await context.bot.send_message(chat_id=update.effective_chat.id, text="Selecciona el tipo de publicación:", reply_markup=reply_markup)
+
+    await context.bot.send_message(chat_id=update.effective_chat.id,
+                                   text="Selecciona el tipo de publicación:", reply_markup=reply_markup)
     return PUBLICATION_TYPE
 
 
 async def publication_type(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     publication_type = query.data
-    
-    context.user_data['publication_type'] = publication_type    
-    
+
+    context.user_data['publication_type'] = publication_type
+
     await query.answer()
     await query.edit_message_text(f"Tipo de publicación seleccionado: {publication_type}")
-    
+
     await context.bot.send_message(chat_id=update.effective_chat.id, text="Proporcione el DOI de la publicación.")
     return DOI
 
@@ -259,25 +260,28 @@ async def doi(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def tags(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data['tags'] = update.message.text.split(',')    
+    context.user_data['tags'] = update.message.text.split(',')
     archives = "\n".join(f"- {archivo}" for archivo in os.listdir(media_route + str(update.effective_chat.id)))
-    
-    await context.bot.send_message(chat_id=update.effective_chat.id, text=f"Datos recopilados:\n"
-                                  f"Título: {context.user_data['title']}\n"
-                                  f"Descripción: {context.user_data['description']}\n"
-                                  f"Tipo de publicación: {context.user_data['publication_type']}\n"
-                                  f"DOI: {context.user_data['doi']}\n"
-                                  f"Etiquetas: {', '.join(context.user_data['tags'])}\n"
-                                f"Archivos adjuntos:\n{archives}")    
-    
+
+    await context.bot.send_message(chat_id=update.effective_chat.id,
+                                   text=f"Datos recopilados:\n"
+                                        f"Título: {context.user_data['title']}\n"
+                                        f"Descripción: {context.user_data['description']}\n"
+                                        f"Tipo de publicación: {context.user_data['publication_type']}\n"
+                                        f"DOI: {context.user_data['doi']}\n"
+                                        f"Etiquetas: {', '.join(context.user_data['tags'])}\n"
+                                        f"Archivos adjuntos:\n{archives}")
+
     keyboard = [
         [InlineKeyboardButton("Confirmar", callback_data="confirm_upload")],
         [InlineKeyboardButton("Cancelar", callback_data="cancel_upload")]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    
-    await context.bot.send_message(chat_id=update.effective_chat.id, text="¿Estás seguro de querer subir el dataset con estos datos?", reply_markup=reply_markup)
-    
+
+    await context.bot.send_message(chat_id=update.effective_chat.id,
+                                   text="¿Estás seguro de querer subir el dataset con estos datos?",
+                                   reply_markup=reply_markup)
+
     return CONFIRMATION
 
 
@@ -291,11 +295,12 @@ async def confirmation(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "csrf_token": csrf_token,
             "title": context.user_data['title'],
             "desc": context.user_data['description'],
-            "publication_type": str(context.user_data['publication_type']).replace("_", "").replace(" ", "").lower(),
+            "publication_type":
+                str(context.user_data['publication_type']).replace("_", "").replace(" ", "").lower(),
             "publication_doi": "",
             "tags": ','.join(context.user_data['tags']),
         }
-                
+
         user_dir = os.path.join(media_route, str(update.effective_chat.id))
         file_list = os.listdir(user_dir)
 
@@ -312,8 +317,8 @@ async def confirmation(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         if response.status_code == 200:
             await query.edit_message_text("Dataset subido exitosamente a Uvlhub.")
-            await context.bot.send_message(
-                chat_id=update.effective_chat.id, text="Para ver el dataset, use /myDatasets")
+            await context.bot.send_message(chat_id=update.effective_chat.id,
+                                           text="Para ver el dataset, use /myDatasets")
 
         else:
             await query.edit_message_text(f"Error en la subida: {response.json().get('message', 'Error desconocido')}")
@@ -326,7 +331,7 @@ async def confirmation(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def test(update: Update, context: ContextTypes.DEFAULT_TYPE):
     file_path = media_route + "prueba.uvl"
-    
+
     await context.bot.send_document(chat_id=update.effective_chat.id, document=open(file_path, 'rb'))
 
 
@@ -336,7 +341,8 @@ async def help(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "/login - Inicia sesión con tu correo y contraseña.\n"
         "/logout - Cierra sesión.\n"
         "/myDatasets - Muestra tus datasets.\n"
-        "Para empezar con el proceso de subida,adjunta los archivos en formato .uvl y luego envía el comando /upload.\n"
+        "Para empezar con el proceso de subida, adjunta los archivos en formato .uvl y luego envía el comando /upload."
+        "\n"
         "/upload - Sube los archivos adjuntados a Uvlhub\n"
         "/test - Descarga un archivo .uvl de prueba.\n"
         "/cancel - Cancela el proceso de subida.\n"
