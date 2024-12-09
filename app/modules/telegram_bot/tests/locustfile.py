@@ -1,4 +1,6 @@
 from locust import HttpUser, task, between
+from decouple import config
+
 
 class TelegramBotUser(HttpUser):
     host = "https://api.telegram.org"
@@ -6,7 +8,7 @@ class TelegramBotUser(HttpUser):
 
     @task
     def send_start_command(self):
-        bot_token = "7318289178:AAGlwhBrbP-6RVSpx67k-B1izPLZYMIrRO0"
+        bot_token = config('TELEGRAM_BOT_TOKEN')
         self.client.post(
             f"/bot{bot_token}/sendMessage",
             json={
