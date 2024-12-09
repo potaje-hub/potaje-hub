@@ -23,3 +23,12 @@ def test_login_success(test_client):
     assert response.request.path != url_for("auth.login"), "Login was unsuccessful"
 
     test_client.get("/logout", follow_redirects=True)
+
+def test_login_unsuccessful_bad_email(test_client):
+    response = test_client.post(
+        "/login", data=dict(email="wrongemail@example.com", password="test1234"), follow_redirects=True
+    )
+
+    assert response.request.path == url_for("auth.login"), "Login was unsuccessful"
+
+    test_client.get("/logout", follow_redirects=True)
