@@ -16,6 +16,8 @@ from app.modules.dataset.services import DataSetService
 
 dataset_service = DataSetService()
 
+media_route = "app/modules/telegram_bot/media/"
+
 
 csrf_token = None
 
@@ -75,8 +77,8 @@ async def login(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await context.bot.send_message(chat_id=update.effective_chat.id, text="Use /help para conocer los comandos disponibles.")
 
         return
-    if os.path.exists("telegram_bot/media/" + str(update.effective_chat.id)):
-        shutil.rmtree("telegram_bot/media/" + str(update.effective_chat.id), ignore_errors=True)
+    if os.path.exists(media_route + str(update.effective_chat.id)):
+        shutil.rmtree(media_route + str(update.effective_chat.id), ignore_errors=True)
     await context.bot.send_message(chat_id=update.effective_chat.id, text="Introduzca el correo electrónico.")
     return EMAIL
 
@@ -108,7 +110,7 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def logout(update: Update, context: ContextTypes.DEFAULT_TYPE):
     session.get(f"{BASE_URL}/logout")
     logged_in_users.pop(update.effective_chat.id, None)
-    shutil.rmtree("telegram_bot/media/" + str(update.effective_chat.id), ignore_errors=True)
+    shutil.rmtree(media_route + str(update.effective_chat.id), ignore_errors=True)
     await context.bot.send_message(chat_id=update.effective_chat.id, text="Sesión cerrada correctamente.")
 
 async def my_datasets(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -154,15 +156,15 @@ async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not document.file_name.endswith('.uvl'):
         await update.message.reply_text("Solo se permiten archivos con extensión .uvl. Por favor, adjunte un archivo válido.")
         return ConversationHandler.END
-    if not os.path.exists("telegram_bot/media/" + str(update.effective_chat.id)):
-        os.makedirs("telegram_bot/media/" + str(update.effective_chat.id))
-    file_path = os.path.join("telegram_bot/media/" + str(update.effective_chat.id), document.file_name)
+    if not os.path.exists(media_route + str(update.effective_chat.id)):
+        os.makedirs(media_route + str(update.effective_chat.id))
+    file_path = os.path.join(media_route + str(update.effective_chat.id), document.file_name)
     
     file = await document.get_file()
     await file.download_to_drive(file_path)
     context.user_data['file_path'] = file_path
 
-    total_files = len(os.listdir("telegram_bot/media/" + str(update.effective_chat.id)))
+    total_files = len(os.listdir(media_route + str(update.effective_chat.id)))
     await update.message.reply_text(f"Se han subido un total de {total_files} archivos.")
 
     try:
@@ -184,7 +186,7 @@ async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"Error durante la subida del archivo: {str(e)}")
             
 async def upload(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not os.path.exists("telegram_bot/media/" + str(update.effective_chat.id)) or len(os.listdir("telegram_bot/media/" + str(update.effective_chat.id)))<1:
+    if not os.path.exists(media_route + str(update.effective_chat.id)) or len(os.listdir(media_route + str(update.effective_chat.id)))<1:
         await context.bot.send_message(chat_id=update.effective_chat.id, text="Debes adjuntar primero uno o varios archivos")
         await context.bot.send_message(chat_id=update.effective_chat.id, text="Si no tienes archivos .uvl, puedes descargarte uno usando /test")
         return
@@ -225,7 +227,7 @@ async def doi(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def tags(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['tags'] = update.message.text.split(',')
-    archives = "\n".join(f"- {archivo}" for archivo in os.listdir("telegram_bot/media/" + str(update.effective_chat.id)))
+    archives = "\n".join(f"- {archivo}" for archivo in os.listdir(media_route + str(update.effective_chat.id)))
     
     await update.message.reply_text(f"Datos recopilados:\n"
                                   f"Título: {context.user_data['title']}\n"
@@ -260,14 +262,14 @@ async def confirmation(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "tags": ','.join(context.user_data['tags']),
         }
                 
-        user_dir = os.path.join("telegram_bot/media", str(update.effective_chat.id))
+        user_dir = os.path.join(media_route, str(update.effective_chat.id))
         file_list = os.listdir(user_dir)
         
         for i, file_name in enumerate(file_list):
             data[f"feature_models-{i}-uvl_filename"] = file_name
             data[f"feature_models-{i}-title"] = ''
             data[f"feature_models-{i}-desc"] = ''
-            data[f"feature_models-{i}-publication_type"] = str(context.user_data['publication_type']).replace("_", "").replace(" ","").lower()
+            data[f"feature_models-{i}-publication_type"] = 'other'
             data[f"feature_models-{i}-publication_doi"] = ''
             data[f"feature_models-{i}-tags"] = ','.join(context.user_data['tags'])
             data[f"feature_models-{i}-uvl_version"] = ''
@@ -288,7 +290,7 @@ async def confirmation(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def test(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    file_path = "telegram_bot/media/prueba.uvl"
+    file_path = media_route + "prueba.uvl"
     
     await context.bot.send_document(chat_id=update.effective_chat.id, document=open(file_path, 'rb'))
 
