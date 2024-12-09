@@ -93,7 +93,7 @@ def test_login_to_portal(mock_session):
     session = mock_session.return_value
     base_url = "http://example.com"
     email = "test@example.com"
-    password = "password123"
+    password = "yvuswbiyv13wev12678"
 
     assert login_to_portal(session, base_url, email, password) is False
 
@@ -111,31 +111,26 @@ async def test_logout(context, update):
 
 
 @pytest.mark.asyncio
-async def test_handle_document_logged_in(update, context):
+@patch("app.modules.telegram_bot.main.media_route", "app/modules/telegram_bot/tests/")
+@patch("os.makedirs")
+@patch("os.path.exists", return_value=False)  # Simula que la carpeta no existe
+async def test_handle_document_logged_in(_, mock_makedirs, update, context):
     logged_in_users[12345] = "mock_session_token"
 
-    # Mocks necesarios
-    @patch("app.modules.telegram_bot.main.media_route", "app/modules/telegram_bot/tests/")
-    @patch("os.makedirs")
-    @patch("os.path.exists", return_value=False)  # Simula que la carpeta no existe
-    async def inner(mock_exists, mock_makedirs):
+    mock_makedirs.return_value = None
 
-        mock_makedirs.return_value = None
+    mock_file = MockFile()
+    update.message.document.get_file = AsyncMock(return_value=mock_file)
 
-        mock_file = MockFile()
-        update.message.document.get_file = AsyncMock(return_value=mock_file)
+    await handle_document(update, context)
 
-        await handle_document(update, context)
+    # Verifica que no se haya llamado a send_message
+    context.bot.send_message.assert_not_called()
 
-        # Verifica que no se haya llamado a send_message
-        context.bot.send_message.assert_not_called()
-
-        # Verifica que no se haya llamado con el mensaje de error
-        called_args = context.bot.send_message.call_args_list
-        for call in called_args:
-            assert f"Error durante la subida del archivo: {mock_file.filename}" not in call[1]["text"]
-
-    await inner()
+    # Verifica que no se haya llamado con el mensaje de error
+    called_args = context.bot.send_message.call_args_list
+    for call in called_args:
+        assert f"Error durante la subida del archivo: {mock_file.filename}" not in call[1]["text"]
 
 
 @pytest.mark.asyncio
