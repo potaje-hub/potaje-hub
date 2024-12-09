@@ -168,6 +168,7 @@ async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await context.bot.send_message(chat_id=update.effective_chat.id,
                                        text="Debe iniciar sesión para subir archivos a Uvlhub.")
         await context.bot.send_message(chat_id=update.effective_chat.id, text="Usa /login para iniciar sesión")
+        print("No estaba logueado")
         return
     document: Document = update.message.document
 
@@ -183,9 +184,10 @@ async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
     file_path = os.path.join(media_route + str(update.effective_chat.id), document.file_name)
 
     file = await document.get_file()
-
     await file.download_to_drive(file_path)
     context.user_data['file_path'] = file_path
+    print(f"el archivo {file} ha llegado")
+
 
     total_files = len(os.listdir(media_route + str(update.effective_chat.id)))
     await update.message.reply_text(f"Se han subido un total de {total_files} archivos.")
@@ -201,6 +203,7 @@ async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
 
         if response.status_code == 200:
+            print(f"el docuemento {document.file_name} se ha subido")
             await update.message.reply_text(f"Archivo '{document.file_name}' subido exitosamente a Uvlhub.")
         else:
             await update.message.reply_text(
