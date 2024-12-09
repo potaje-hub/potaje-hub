@@ -1,13 +1,14 @@
 
 import pytest
-from unittest.mock import AsyncMock, patch, MagicMock
+from unittest.mock import AsyncMock, patch, MagicMock, ANY
 from telegram import Update, InlineKeyboardButton, Message, Chat, User
 from telegram.ext import ContextTypes
 import sys
 import os
 from app.modules.telegram_bot.main import (
-    start, login, is_valid_email, email, password, cancel, logout,
-    handle_document, my_datasets, login_to_portal, test, logged_in_users, upload, media_route
+    start, login, is_valid_email, email, password, cancel, logout, BASE_URL,
+    handle_document, my_datasets, login_to_portal, test, logged_in_users, 
+    upload, title, description, publication_type, doi, tags, confirmation
 )
 
 class MockFile:
@@ -168,11 +169,65 @@ async def test_upload(update, context):
     logged_in_users[12345] = "mock_session_token"
     file_content = b"mock file content"
     update.message.document.file_id = "mock_file_id"
-    with patch("app.modules.telegram_bot.main.download_file") as mock_download_file, \
-         patch("app.modules.telegram_bot.main.upload_to_portal") as mock_upload_to_portal:
-        mock_download_file.return_value = file_content
-        mock_upload_to_portal.return_value = True
+    
+    with patch('os.path.exists', return_value=True), \
+         patch('os.listdir', return_value=['file1.uvl']), \
+         patch('app.modules.telegram_bot.main.session.post') as mock_post:
+                     
+        mock_post.return_value.status_code = 200
+        mock_post.return_value.json.return_value = {'message': 'Success'}
+        
         await upload(update, context)
-        mock_download_file.assert_called_once_with("mock_file_id")
-        mock_upload_to_portal.assert_called_once_with("mock_session_token", file_content)
-        context.bot.send_message.assert_any_call(chat_id=12345, text="Archivo subido correctamente a Uvlhub.")
+                
+        context.bot.send_message.assert_any_call(chat_id=12345, text="Escriba el título del dataset")
+        update.message.text = "Título"
+        await title(update, context)
+
+        update.message.text = "Descripción"
+        await description(update, context)
+        
+        context.bot.send_message.assert_any_call(chat_id=12345, text="¿Qué tipo de publicación es? Selecciona una opción de la lista.")
+        
+        valid_option = "other"
+    
+        callback_query = MagicMock()
+        callback_query.data = valid_option 
+        update.callback_query = callback_query
+        
+        callback_query.answer = AsyncMock()
+        callback_query.edit_message_text = AsyncMock()
+        
+        await publication_type(update, context)
+        
+        context.bot.send_message.assert_any_call(chat_id=12345, text="Proporcione el DOI de la publicación.")
+        
+        update.message.text = ""
+        await doi(update, context)
+        
+        context.bot.send_message.assert_any_call(chat_id=12345, text="Indique las etiquetas separadas por comas.")
+        update.message.text = "tag,test"
+        await tags(update, context)        
+        
+        callback_query.data = "confirm_upload"
+        await confirmation(update, context)        
+    
+        mock_post.assert_called_once_with(
+            f"{BASE_URL}/dataset/upload",
+            data={
+                "csrf_token": "mock_token",
+                "title": "Título",
+                "desc": "Descripción",
+                "publication_type": "other",
+                "publication_doi": "",
+                "tags": "tag,test",
+                "feature_models-0-uvl_filename": "file1.uvl",
+                "feature_models-0-title": "", 
+                "feature_models-0-desc": "",
+                "feature_models-0-publication_type": "other",
+                "feature_models-0-publication_doi": "",
+                "feature_models-0-tags": "tag,test",
+                "feature_models-0-uvl_version": ""
+            }
+        )
+        
+        context.bot.send_message.assert_any_call(chat_id=12345, text="Para ver el dataset, use /myDatasets")

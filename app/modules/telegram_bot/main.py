@@ -149,14 +149,10 @@ async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_chat.id not in logged_in_users:
         await context.bot.send_message(chat_id=update.effective_chat.id, text="Debe iniciar sesión para subir archivos a Uvlhub.")
         await context.bot.send_message(chat_id=update.effective_chat.id, text="Usa /login para iniciar sesión")
-        print("No estaba logueado")
         return
     document: Document = update.message.document
-    print(document)
-    print(document.file_name)
-
+    
     if not document.file_name.endswith('.uvl'):
-        print("No es un uvl")
         await context.bot.send_message(chat_id=update.effective_chat.id, text="Solo se permiten archivos con extensión .uvl. Por favor, adjunte un archivo válido.")
         return ConversationHandler.END
     
@@ -166,16 +162,13 @@ async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
     file_path = os.path.join(media_route + str(update.effective_chat.id), document.file_name)
     
     file = await document.get_file()
-    print(f"el archivo {file} ha llegado")
     
     await file.download_to_drive(file_path)
     context.user_data['file_path'] = file_path
-    print(f"el archivo {file} ha llegado")
 
 
     total_files = len(os.listdir(media_route + str(update.effective_chat.id)))
     await update.message.reply_text(f"Se han subido un total de {total_files} archivos.")
-    print(f"Se han subido un total de {total_files} archivos.")
     try:
         with open(file_path, "rb") as f:
             files = {
@@ -188,10 +181,8 @@ async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
         
         if response.status_code == 200:
-            print(f"el docuemento {document.file_name} se ha subido")
             await update.message.reply_text(f"Archivo '{document.file_name}' subido exitosamente a Uvlhub.")
         else:
-            print(f"Error al subir el archivo a Uvlhub: {response.status_code}\n{response.text}")
             await update.message.reply_text(f"Error al subir el archivo a Uvlhub: {response.status_code}\n{response.text}")
     except Exception as e:
         await update.message.reply_text(f"Error durante la subida del archivo: {str(e)}")
@@ -206,41 +197,41 @@ async def upload(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def title(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['title'] = update.message.text
-    await update.message.reply_text("Proporcione una descripción para el datset.")
+    await context.bot.send_message(chat_id=update.effective_chat.id, text="Proporcione una descripción para el datset.")
     return DESCRIPTION
 
 async def description(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['description'] = update.message.text
-    await update.message.reply_text("¿Qué tipo de publicación es? Selecciona una opción de la lista.")
+    await context.bot.send_message(chat_id=update.effective_chat.id, text="¿Qué tipo de publicación es? Selecciona una opción de la lista.")
     
     keyboard = [[InlineKeyboardButton(option, callback_data=option)] for option in VALID_PUBLICATION_TYPES]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    await update.message.reply_text("Selecciona el tipo de publicación:", reply_markup=reply_markup)
+    await context.bot.send_message(chat_id=update.effective_chat.id, text="Selecciona el tipo de publicación:", reply_markup=reply_markup)
     return PUBLICATION_TYPE
 
 async def publication_type(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     publication_type = query.data
     
-    context.user_data['publication_type'] = publication_type
+    context.user_data['publication_type'] = publication_type    
     
     await query.answer()
     await query.edit_message_text(f"Tipo de publicación seleccionado: {publication_type}")
     
-    await query.message.reply_text("Proporcione el DOI de la publicación.")
+    await context.bot.send_message(chat_id=update.effective_chat.id, text="Proporcione el DOI de la publicación.")
     return DOI
 
 async def doi(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['doi'] = update.message.text
-    await update.message.reply_text("Indique las etiquetas separadas por comas.")
+    await context.bot.send_message(chat_id=update.effective_chat.id, text="Indique las etiquetas separadas por comas.")
     return TAGS
 
 async def tags(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data['tags'] = update.message.text.split(',')
+    context.user_data['tags'] = update.message.text.split(',')    
     archives = "\n".join(f"- {archivo}" for archivo in os.listdir(media_route + str(update.effective_chat.id)))
     
-    await update.message.reply_text(f"Datos recopilados:\n"
+    await context.bot.send_message(chat_id=update.effective_chat.id, text=f"Datos recopilados:\n"
                                   f"Título: {context.user_data['title']}\n"
                                   f"Descripción: {context.user_data['description']}\n"
                                   f"Tipo de publicación: {context.user_data['publication_type']}\n"
@@ -254,7 +245,7 @@ async def tags(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    await update.message.reply_text("¿Estás seguro de querer subir el dataset con estos datos?", reply_markup=reply_markup)
+    await context.bot.send_message(chat_id=update.effective_chat.id, text="¿Estás seguro de querer subir el dataset con estos datos?", reply_markup=reply_markup)
     
     return CONFIRMATION
 
