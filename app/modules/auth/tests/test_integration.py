@@ -42,3 +42,9 @@ def test_login_unsuccessful_bad_password(test_client):
 
     test_client.get("/logout", follow_redirects=True)
     
+def test_login_unsuccessful_not_verified(test_client):
+    response = test_client.post(
+        "/login", data=dict(email="test2@example.com", password="test1234"), follow_redirects=True
+    )
+
+    assert response.request.path == url_for("auth.login"), "Login was unsuccessful"
