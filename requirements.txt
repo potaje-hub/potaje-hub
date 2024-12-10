@@ -69,6 +69,7 @@ PySocks==1.7.1
 pytest==8.2.2
 pytest-cov==5.0.0
 python-dateutil==2.9.0.post0
+python-decouple==3.8
 python-dotenv==1.0.1
 python-sat==1.8.dev13
 pytz==2024.1
@@ -99,4 +100,4 @@ zope.event==5.0
 zope.interface==6.4.post2
 zstandard==0.22.0
 python-telegram-bot==21.7
-pytest-asyncio
+pytest-asyncio==0.24.0
