@@ -146,12 +146,19 @@
     <script src="{{ url_for('auth.scripts') }}"></script>
 
     <script>
-        const github_user = document.getElementById('github-user-field');
-        const checkbox = document.getElementById('developer_checkbox');
-
-        // Manejar cambios en el checkbox
-        checkbox.addEventListener('change', function() {
-            githubField.style.display = this.checked ? 'block' : 'none';
+    document.addEventListener('DOMContentLoaded', function() {
+        var developerCheckbox = document.getElementById('developer_checkbox');
+        var githubUserField = document.getElementById('github-user-field');
+    
+        developerCheckbox.addEventListener('change', function() {
+            if (developerCheckbox.checked) {
+                githubUserField.style.display = 'block';
+            } else {
+                githubUserField.style.display = 'none';
+            }
         });
+
+        developerCheckbox.dispatchEvent(new Event('change'));
+    });
     </script>
 {% endblock %}
