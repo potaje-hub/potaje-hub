@@ -188,7 +188,8 @@ async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['file_path'] = file_path
 
     total_files = len(os.listdir(media_route + str(update.effective_chat.id)))
-    await update.message.reply_text(f"Se han subido un total de {total_files} archivos.")
+    await context.bot.send_message(chat_id=update.effective_chat.id,
+                                   text=f"Se han subido un total de {total_files} archivos.")
     try:
         with open(file_path, "rb") as f:
             files = {

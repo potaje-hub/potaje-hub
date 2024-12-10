@@ -153,19 +153,21 @@ async def test_my_datasets(mock_get, update, context):
 @pytest.mark.asyncio
 @patch("app.modules.telegram_bot.main.media_route", "app/modules/telegram_bot/tests/")
 @patch("os.makedirs")
-@patch("os.path.exists", return_value=False)  # Simula que la carpeta no existe
+@patch("os.path.exists", return_value=False)
+@patch("os.listdir", return_value=["test_file.uvl"])
 async def test_handle_document_logged_in(_, mock_makedirs, update, context):
     logged_in_users[12345] = "mock_session_token"
-
+    update.effective_chat.id = 12345
     mock_makedirs.return_value = None
 
     mock_file = MockFile()
     update.message.document.get_file = AsyncMock(return_value=mock_file)
-
+    update.message.reply_text = AsyncMock()
+    
     await handle_document(update, context)
 
-    # Verifica que no se haya llamado a send_message
-    context.bot.send_message.assert_not_called()
+    context.bot.send_message.assert_any_call(chat_id=12345,
+                                             text="Se han subido un total de 1 archivos.")
 
     # Verifica que no se haya llamado con el mensaje de error
     called_args = context.bot.send_message.call_args_list
