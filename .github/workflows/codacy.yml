@@ -53,6 +53,10 @@ jobs:
       run: |
         pip install pip-audit
         pip-audit || true
+    
+    - name: Copy .env file
+      run: |
+        cp .env.local.example .env
   
     - name: Upload coverage to Codacy
       run: |

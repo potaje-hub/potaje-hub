@@ -40,6 +40,10 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
+    - name: Copy .env file
+      run: |
+        cp .env.local.example .env
+  
     - name: Run Tests
       env:
         FLASK_ENV: testing
