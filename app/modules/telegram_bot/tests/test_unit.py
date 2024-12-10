@@ -163,7 +163,7 @@ async def test_handle_document_logged_in(_, mock_makedirs, update, context):
     mock_file = MockFile()
     update.message.document.get_file = AsyncMock(return_value=mock_file)
     update.message.reply_text = AsyncMock()
-    
+
     await handle_document(update, context)
 
     context.bot.send_message.assert_any_call(chat_id=12345,
