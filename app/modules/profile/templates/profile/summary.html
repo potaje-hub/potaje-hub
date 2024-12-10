@@ -23,6 +23,9 @@
                 <p class="card-text h5"><i class="fa fa-envelope"></i> <strong>Email:</strong> {{user.email}}</p>
                 <p class="card-text h5"><i class="fa fa-database"></i> <strong>Uploaded datasets:</strong> {{ total_datasets }} datasets</p>
                 <p class="card-text h5"><i class="fa fa-envelope"></i> <strong>Are you a developer?:</strong> {{ 'Yes' if user.developer else 'No' }}</p>
+                {% if user.developer %}
+                    <p class="card-text h5"><i class="fa fa-envelope"></i> <strong>Your Github user:</strong> {{user.github_user}}</p>
+                {% endif %}
             </div>
             
         </div>
