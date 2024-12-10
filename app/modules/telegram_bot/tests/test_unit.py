@@ -1,11 +1,13 @@
 import pytest
 from unittest.mock import AsyncMock, patch, MagicMock
-from telegram import Update, Message, Chat, User
+from telegram import (
+    Update, Message, Chat, User, InlineKeyboardMarkup, InlineKeyboardButton
+)
 from telegram.ext import ContextTypes
 from decouple import config
 from app.modules.telegram_bot.main import (
     start, login, is_valid_email, email, password, cancel, logout, BASE_URL,
-    handle_document, login_to_portal, test, logged_in_users,
+    handle_document, login_to_portal, test, logged_in_users, my_datasets,
     upload, title, description, publication_type, doi, tags, confirmation
 )
 
@@ -107,6 +109,44 @@ async def test_logout(context, update):
 
     context.bot.send_message.assert_any_call(
         chat_id=12345, text="Sesión cerrada correctamente."
+    )
+
+
+@pytest.mark.asyncio
+@patch("app.modules.telegram_bot.main.session.get")
+async def test_my_datasets(mock_get, update, context):
+
+    mock_get.return_value.text = """
+        <h1>My datasets</h1>
+        <div>
+            <a href="http://example.com/dataset/1">Dataset 1</a>
+            <a href="http://example.com/dataset/2">Dataset 2</a>
+        </div>
+        <h5>Unsynchronized datasets</h5>
+        <table>
+            <tr><th>Unsynchronized Datasets</th></tr>
+            <tr><td><a href="/dataset/3">Dataset 3</a></td></tr>
+        </table>
+    """
+
+    logged_in_users[12345] = "mock_session_token"
+
+    await my_datasets(update, context)
+
+    context.bot.send_message.assert_any_call(
+        chat_id=12345,
+        text="Datasets sincronizados:",
+        reply_markup=InlineKeyboardMarkup([
+            [InlineKeyboardButton("Dataset 1", url="http://example.com/dataset/1")],
+            [InlineKeyboardButton("Dataset 2", url="http://example.com/dataset/2")]
+        ])
+    )
+    context.bot.send_message.assert_any_call(
+        chat_id=12345,
+        text="Datasets no sincronizados:",
+        reply_markup=InlineKeyboardMarkup([
+            [InlineKeyboardButton("Dataset 3", url=f"{BASE_URL}/dataset/3")]
+        ])
     )
 
 
