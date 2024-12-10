@@ -71,6 +71,7 @@
                 </div>
 
                 <div class="row">
+
                     <div class="col-md-6 col-lg-6 col-xs-12">
                         <div class="mb-3">
                             {{ form.developer.label(class="form-label") }}
@@ -80,6 +81,24 @@
                             {% endfor %}
                         </div>
                     </div>
+
+                </div>
+
+                <div id="github-field" class="row" 
+                {% if not form.developer.data %}
+                    style="display: none;"
+                {% endif %}>
+
+                    <div class="col-md-6 col-lg-6 col-xs-12">
+                        <div class="mb-3">
+                            {{ form.github_user.label(class="form-label") }}
+                            {{ form.github_user(class="form-control",placeholder="Your Github user") }}
+                            {% for error in form.github_user.errors %}
+                                <span style="color: red;">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+
                 </div>
 
                 <div class="row">
