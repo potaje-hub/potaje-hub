@@ -12,6 +12,8 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(256), unique=True, nullable=False)
     password = db.Column(db.String(256), nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+    developer = db.Column(db.Boolean, nullable=True, default=False)
+    github_user = db.Column(db.String(256), default="")
 
     data_sets = db.relationship('DataSet', backref='user', lazy=True)
     profile = db.relationship('UserProfile', backref='user', uselist=False)
