@@ -130,7 +130,6 @@ def test_upload_dataset():
         close_driver(driver)
 
 
-
 def test_download_dataset_glencoe():
     driver = initialize_driver()
 
