@@ -15,6 +15,7 @@ def test_client(test_client):
 
     yield test_client
 
+
 def test_login_success(test_client):
     response = test_client.post(
         "/login", data=dict(email="test@example.com", password="test1234"), follow_redirects=True
@@ -23,6 +24,7 @@ def test_login_success(test_client):
     assert response.request.path != url_for("auth.login"), "Login was unsuccessful"
 
     test_client.get("/logout", follow_redirects=True)
+
 
 def test_login_unsuccessful_bad_email(test_client):
     response = test_client.post(
@@ -33,6 +35,7 @@ def test_login_unsuccessful_bad_email(test_client):
 
     test_client.get("/logout", follow_redirects=True)
 
+
 def test_login_unsuccessful_bad_password(test_client):
     response = test_client.post(
         "/login", data=dict(email="test@example.com", password="wrongpassword"), follow_redirects=True
@@ -41,13 +44,15 @@ def test_login_unsuccessful_bad_password(test_client):
     assert response.request.path == url_for("auth.login"), "Login was unsuccessful"
 
     test_client.get("/logout", follow_redirects=True)
-    
+
+
 def test_login_unsuccessful_not_verified(test_client):
     response = test_client.post(
         "/login", data=dict(email="test2@example.com", password="test1234"), follow_redirects=True
     )
 
     assert response.request.path == url_for("auth.login"), "Login was unsuccessful"
+
 
 def test_signup_user_no_name(test_client):
     response = test_client.post(
@@ -57,6 +62,7 @@ def test_signup_user_no_name(test_client):
 
     assert b"This field is required" in response.data, response.data
 
+
 def test_signup_user_unsuccessful(test_client):
     email = "test@example.com"
     response = test_client.post(
@@ -64,6 +70,7 @@ def test_signup_user_unsuccessful(test_client):
     )
     assert response.request.path == url_for("auth.show_signup_form"), "Signup was unsuccessful"
     assert f"Email {email} in use".encode("utf-8") in response.data
+
 
 def test_signup_user_successful(test_client):
     response = test_client.post(
