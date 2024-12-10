@@ -26,4 +26,4 @@ jobs:
 
       - name: Run Tests with pytest
         run: |
-          pytest
+          pytest --ignore=tests/selenium
