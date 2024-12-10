@@ -84,7 +84,7 @@
 
                 </div>
 
-                <div id="github-field" class="row" 
+                <div id="github-user-field" class="row" 
                 {% if not form.developer.data %}
                     style="display: none;"
                 {% endif %}>
@@ -92,7 +92,7 @@
                     <div class="col-md-6 col-lg-6 col-xs-12">
                         <div class="mb-3">
                             {{ form.github_user.label(class="form-label") }}
-                            {{ form.github_user(class="form-control",placeholder="Your Github user") }}
+                            {{ form.github_user(class="form-control", placeholder="Your Github user") }}
                             {% for error in form.github_user.errors %}
                                 <span style="color: red;">{{ error }}</span>
                             {% endfor %}
@@ -144,4 +144,14 @@
 
 {% block scripts %}
     <script src="{{ url_for('auth.scripts') }}"></script>
+
+    <script>
+        const github_user = document.getElementById('github-user-field');
+        const checkbox = document.getElementById('developer_checkbox');
+
+        // Manejar cambios en el checkbox
+        checkbox.addEventListener('change', function() {
+            githubField.style.display = this.checked ? 'block' : 'none';
+        });
+    </script>
 {% endblock %}
