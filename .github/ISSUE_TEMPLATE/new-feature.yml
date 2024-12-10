@@ -1,0 +1,29 @@
+name: "New Feature Request"
+description: "Request a new feature or enhancement for the application."
+labels: ['enhancement']
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Please provide a detailed explanation to help us understand the feature you're requesting.**
+
+  - type: textarea
+    attributes:
+      label: Feature Description
+      description: "Describe the feature you'd like to see in the application."
+      placeholder: "Provide a detailed description of the feature..."
+
+  - type: input
+    attributes:
+      label: Use Case
+      description: "Provide an example use case or situation where this feature would be useful."
+      placeholder: "Describe how you would use this feature..."
+
+  - type: dropdown
+    attributes:
+      label: Is this feature critical?
+      description: "Select if this feature is critical to the user experience."
+      options:
+        - "Yes"
+        - "No"
