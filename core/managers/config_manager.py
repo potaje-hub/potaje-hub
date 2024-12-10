@@ -49,6 +49,8 @@ class TestingConfig(Config):
         f"{os.getenv('MARIADB_TEST_DATABASE', 'default_db')}"
     )
     WTF_CSRF_ENABLED = False
+    DEBUG = False
+    FLASK_ENV = 'testing'
 
 
 class ProductionConfig(Config):

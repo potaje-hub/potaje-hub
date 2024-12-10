@@ -42,8 +42,11 @@ jobs:
 
     - name: Copy .env file
       run: |
-        cp .env.local.example .env
-    
+        cp .env.local.example .env.local
+
+    - name: Set Flask App
+      run: echo "FLASK_APP=app:create_app('testing')" >> $GITHUB_ENV
+      
     - name: Run Flask
       run: flask run --host=0.0.0.0 --port=5000
       env:
