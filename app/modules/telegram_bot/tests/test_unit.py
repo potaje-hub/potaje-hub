@@ -3,8 +3,7 @@ import pytest
 from unittest.mock import AsyncMock, patch, MagicMock
 from telegram import Update, Message, Chat, User
 from telegram.ext import ContextTypes
-import random
-import string
+from decouple import config
 from app.modules.telegram_bot.main import (
     start, login, is_valid_email, email, password, cancel, logout, BASE_URL,
     handle_document, login_to_portal, test, logged_in_users,
@@ -95,7 +94,7 @@ def test_login_to_portal(mock_session):
     session = mock_session.return_value
     base_url = "http://example.com"
     email = "test@example.com"
-    password = ''.join(random.choices(string.ascii_letters + string.digits, k=16))
+    password = config('MARIADB_PASSWORD')
 
     assert login_to_portal(session, base_url, email, password) is False
 
