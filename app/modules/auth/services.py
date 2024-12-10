@@ -48,7 +48,7 @@ class AuthenticationService(BaseService):
             user_data = {
                 "email": email,
                 "password": password,
-                "developer": developer, 
+                "developer": developer,
                 "github_user": github_user
             }
 
