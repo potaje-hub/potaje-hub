@@ -74,6 +74,7 @@ def test_signup_user_successful(test_client):
     )
     assert response.request.path == url_for("auth.login"), "Signup was unsuccessful"
 
+
 def test_service_create_with_profie_success(clean_database):
     data = {
         "name": "Test",
