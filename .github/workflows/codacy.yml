@@ -54,15 +54,15 @@ jobs:
         pip install pip-audit
         pip-audit || true
     
-        - name: Copy .env file
-        run: |
-          cp .env.local.example .env.local
+    - name: Copy .env file
+      run: |
+        cp .env.local.example .env.local
   
     - name: Set Flask App
       run: echo "FLASK_APP=app:create_app('testing')" >> $GITHUB_ENV
         
     - name: Run Flask
-      run: flask run --host=0.0.0.0 --port=5000
+      run: flask run --host=0.0.0.0 --port=5000 &
       env:
         FLASK_ENV: testing
         MARIADB_HOSTNAME: 127.0.0.1
