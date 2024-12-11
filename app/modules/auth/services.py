@@ -44,6 +44,8 @@ class AuthenticationService(BaseService):
                 raise ValueError("Surname is required.")
             if developer and not github_user:
                 raise ValueError("For a developer a Github User is required.")
+            if not developer and github_user:
+                raise ValueError("Github User should not be provided if not a developer.")
 
             user_data = {
                 "email": email,
