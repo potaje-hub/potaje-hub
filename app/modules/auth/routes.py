@@ -1,4 +1,4 @@
-from flask import render_template, redirect, url_for, request, current_app, flash, Flask
+from flask import render_template, redirect, url_for, request, flash, Flask
 from flask_login import current_user, logout_user
 
 from app.modules.auth import auth_bp
@@ -23,7 +23,6 @@ app.config['MAIL_USE_SSL'] = True
 mail = Mail(app)
 
 
-
 @auth_bp.route("/signup/", methods=["GET", "POST"])
 def show_signup_form():
     if current_user.is_authenticated:
@@ -39,7 +38,7 @@ def show_signup_form():
         except Exception as exc:
             return render_template("auth/signup_form.html", form=form, error=f'Error creating user: {exc}')
 
-        #Create token
+        # Create token
         token = authentication_service.generate_confirmation_token(user.id)
         # Create the confirmation URL
         confirm_url = url_for('auth.confirm_email', token=token, _external=True)
@@ -51,7 +50,7 @@ def show_signup_form():
                 'Verifique su correo',
                 sender='noreply@demo.com',
                 recipients=['uvlhubio@gmail.com'])
-            msg.body=f'Por favor, haga clic en el siguiente enlace para verificar su correo:{confirm_url}'
+            msg.body = f'Por favor, haga clic en el siguiente enlace para verificar su correo:{confirm_url}'
 
             # Send the email
             mail.send(msg)
