@@ -58,7 +58,7 @@ class AuthenticationService(BaseService):
             user_data = {
                 "email": email,
                 "password": password,
-                "is_confirmed": is_confirmed
+                "is_confirmed": is_confirmed,
                 "developer": developer,
                 "github_user": github_user
             }
