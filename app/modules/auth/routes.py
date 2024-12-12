@@ -6,7 +6,7 @@ from app.modules.auth.forms import SignupForm, LoginForm
 from app.modules.auth.services import AuthenticationService
 from app.modules.profile.services import UserProfileService
 from flask_mail import Message, Mail
-
+import os
 
 authentication_service = AuthenticationService()
 user_profile_service = UserProfileService()
@@ -16,7 +16,7 @@ app = Flask(__name__)
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 465
 app.config['MAIL_USERNAME'] = 'uvlhubio@gmail.com'
-app.config['MAIL_PASSWORD'] = 'dnal ldpl wsxp eefy'
+app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 
