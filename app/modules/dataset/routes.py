@@ -6,6 +6,9 @@ import tempfile
 import uuid
 from datetime import datetime, timezone
 from zipfile import ZipFile
+from app.modules.flamapy.routes import to_cnf_file, to_glencoe_file, to_splot_file
+from app.modules.hubfile.services import HubfileService
+
 
 from flask import (
     redirect,
@@ -16,6 +19,7 @@ from flask import (
     make_response,
     abort,
     url_for,
+    send_file,
 )
 from flask_login import login_required, current_user
 
@@ -176,6 +180,37 @@ def delete():
     return jsonify({"error": "Error: File not found"})
 
 
+@dataset_bp.route("/dataset/download_all", methods=["GET"])
+def download_all_datasets():
+    datasets = dataset_service.get_all_datasets()
+
+    temp_dir = tempfile.mkdtemp()
+    zip_path = os.path.join(temp_dir, "all_datasets.zip")
+
+    with ZipFile(zip_path, "w") as zipf:
+        for dataset in datasets:
+            file_path = f"uploads/user_{dataset.user_id}/dataset_{dataset.id}/"
+            for subdir, dirs, files in os.walk(file_path):
+                for file in files:
+                    full_path = os.path.join(subdir, file)
+
+                    relative_path = os.path.relpath(full_path, file_path)
+
+                    zipf.write(
+                        full_path,
+                        arcname=os.path.join(
+                            os.path.basename(zip_path[:-4]), relative_path
+                        ),
+                    )
+
+    return send_from_directory(
+        temp_dir,
+        "all_datasets.zip",
+        as_attachment=True,
+        mimetype="application/zip",
+    )
+
+
 @dataset_bp.route("/dataset/download/<int:dataset_id>", methods=["GET"])
 def download_dataset(dataset_id):
     dataset = dataset_service.get_or_404(dataset_id)
@@ -231,6 +266,156 @@ def download_dataset(dataset_id):
 
     if not existing_record:
         # Record the download in your database
+        DSDownloadRecordService().create(
+            user_id=current_user.id if current_user.is_authenticated else None,
+            dataset_id=dataset_id,
+            download_date=datetime.now(timezone.utc),
+            download_cookie=user_cookie,
+        )
+
+    return resp
+
+
+@dataset_bp.route("/dataset/download_DIMACS/<int:dataset_id>", methods=["GET"])
+def download_DIMACS(dataset_id):
+    dataset = dataset_service.get_or_404(dataset_id)
+
+    file_path = f"uploads/user_{dataset.user_id}/dataset_{dataset.id}/"
+
+    temp_dir = tempfile.mkdtemp()
+    zip_path = os.path.join(temp_dir, f"dataset_{dataset_id}.zip")
+
+    with ZipFile(zip_path, "w") as zipf:
+        for subdir, dirs, files in os.walk(file_path):
+            for file in files:
+                full_path = os.path.join(subdir, file)
+                relative_path = os.path.relpath(full_path, file_path)
+
+                # Obtén el file_id a partir del nombre del archivo
+
+                hubfile_service = HubfileService()
+                file_id = hubfile_service.get_file_id_by_name(file)
+
+                dimacs_file = to_cnf_file(file_id)
+                # Obtencion del contenido de la respuesta
+
+                zipf.write(dimacs_file, arcname=f"{relative_path}-dimacs.txt")
+
+    resp = send_file(zip_path, as_attachment=True, download_name=f'dataset_{dataset_id}_DIMACS.zip',
+                     mimetype="application/zip")
+
+    user_cookie = request.cookies.get("download_cookie")
+    if not user_cookie:
+        user_cookie = str(uuid.uuid4())
+        resp.set_cookie("download_cookie", user_cookie)
+
+    existing_record = DSDownloadRecord.query.filter_by(
+        user_id=current_user.id if current_user.is_authenticated else None,
+        dataset_id=dataset_id,
+        download_cookie=user_cookie
+    ).first()
+
+    if not existing_record:
+        DSDownloadRecordService().create(
+            user_id=current_user.id if current_user.is_authenticated else None,
+            dataset_id=dataset_id,
+            download_date=datetime.now(timezone.utc),
+            download_cookie=user_cookie,
+        )
+
+    return resp
+
+
+@dataset_bp.route("/dataset/download_Glencoe/<int:dataset_id>", methods=["GET"])
+def download_Glencoe(dataset_id):
+    dataset = dataset_service.get_or_404(dataset_id)
+
+    file_path = f"uploads/user_{dataset.user_id}/dataset_{dataset.id}/"
+
+    temp_dir = tempfile.mkdtemp()
+    zip_path = os.path.join(temp_dir, f"dataset_{dataset_id}.zip")
+
+    with ZipFile(zip_path, "w") as zipf:
+        for subdir, dirs, files in os.walk(file_path):
+            for file in files:
+                full_path = os.path.join(subdir, file)
+                relative_path = os.path.relpath(full_path, file_path)
+
+                # Obtén el file_id a partir del nombre del archivo
+
+                hubfile_service = HubfileService()
+                file_id = hubfile_service.get_file_id_by_name(file)
+
+                glencoe_file = to_glencoe_file(file_id)
+                # Obtencion del contenido de la respuesta
+
+                zipf.write(glencoe_file, arcname=f"{relative_path}-glencoe.txt")
+
+    resp = send_file(zip_path, as_attachment=True, download_name=f'dataset_{dataset_id}_GLENCOE.zip',
+                     mimetype="application/zip")
+
+    user_cookie = request.cookies.get("download_cookie")
+    if not user_cookie:
+        user_cookie = str(uuid.uuid4())
+        resp.set_cookie("download_cookie", user_cookie)
+
+    existing_record = DSDownloadRecord.query.filter_by(
+        user_id=current_user.id if current_user.is_authenticated else None,
+        dataset_id=dataset_id,
+        download_cookie=user_cookie
+    ).first()
+
+    if not existing_record:
+        DSDownloadRecordService().create(
+            user_id=current_user.id if current_user.is_authenticated else None,
+            dataset_id=dataset_id,
+            download_date=datetime.now(timezone.utc),
+            download_cookie=user_cookie,
+        )
+
+    return resp
+
+
+@dataset_bp.route("/dataset/download_Splot/<int:dataset_id>", methods=["GET"])
+def download_Splot(dataset_id):
+    dataset = dataset_service.get_or_404(dataset_id)
+
+    file_path = f"uploads/user_{dataset.user_id}/dataset_{dataset.id}/"
+
+    temp_dir = tempfile.mkdtemp()
+    zip_path = os.path.join(temp_dir, f"dataset_{dataset_id}.zip")
+
+    with ZipFile(zip_path, "w") as zipf:
+        for subdir, dirs, files in os.walk(file_path):
+            for file in files:
+                full_path = os.path.join(subdir, file)
+                relative_path = os.path.relpath(full_path, file_path)
+
+                # Obtén el file_id a partir del nombre del archivo
+
+                hubfile_service = HubfileService()
+                file_id = hubfile_service.get_file_id_by_name(file)
+
+                splot_file = to_splot_file(file_id)
+                # Obtencion del contenido de la respuesta
+
+                zipf.write(splot_file, arcname=f"{relative_path}-splot.txt")
+
+    resp = send_file(zip_path, as_attachment=True, download_name=f'dataset_{dataset_id}_SPLOT.zip',
+                     mimetype="application/zip")
+
+    user_cookie = request.cookies.get("download_cookie")
+    if not user_cookie:
+        user_cookie = str(uuid.uuid4())
+        resp.set_cookie("download_cookie", user_cookie)
+
+    existing_record = DSDownloadRecord.query.filter_by(
+        user_id=current_user.id if current_user.is_authenticated else None,
+        dataset_id=dataset_id,
+        download_cookie=user_cookie
+    ).first()
+
+    if not existing_record:
         DSDownloadRecordService().create(
             user_id=current_user.id if current_user.is_authenticated else None,
             dataset_id=dataset_id,

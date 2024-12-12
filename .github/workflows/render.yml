@@ -40,6 +40,19 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
+    - name: Copy .env file
+      run: |
+        cp .env.local.example .env.local
+
+    - name: Run Flask
+      run: flask run --host=0.0.0.0 --port=5000 &
+      env:
+        MARIADB_HOSTNAME: 127.0.0.1
+        MARIADB_PORT: 3306
+        MARIADB_TEST_DATABASE: uvlhubdb_test
+        MARIADB_USER: uvlhub_user
+        MARIADB_PASSWORD: uvlhub_password
+
     - name: Run Tests
       env:
         FLASK_ENV: testing
@@ -48,6 +61,7 @@ jobs:
         MARIADB_TEST_DATABASE: uvlhubdb_test
         MARIADB_USER: uvlhub_user
         MARIADB_PASSWORD: uvlhub_password
+        TELEGRAM_BOT_TOKEN: 7318289178:AAGlwhBrbP-6RVSpx67k-B1izPLZYMIrRO0
       run: |
         pytest app/modules/ --ignore-glob='*selenium*'
 

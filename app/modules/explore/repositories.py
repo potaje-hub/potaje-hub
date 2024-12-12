@@ -1,7 +1,7 @@
 import re
-from sqlalchemy import any_, or_
+from sqlalchemy import any_, or_, and_
 import unidecode
-from app.modules.dataset.models import Author, DSMetaData, DataSet, PublicationType
+from app.modules.dataset.models import Author, DSMetaData, DataSet, PublicationType, DSMetrics
 from app.modules.featuremodel.models import FMMetaData, FeatureModel
 from core.repositories.BaseRepository import BaseRepository
 
@@ -10,7 +10,8 @@ class ExploreRepository(BaseRepository):
     def __init__(self):
         super().__init__(DataSet)
 
-    def filter(self, query="", sorting="newest", publication_type="any", tags=[], **kwargs):
+    def filter(self, query="", sorting="newest", publication_type="any", number_of_models=None, number_of_features=None,
+               tags=[], **kwargs):
         # Normalize and remove unwanted characters
         normalized_query = unidecode.unidecode(query).lower()
         cleaned_query = re.sub(r'[,.":\'()\[\]^;!¡¿?]', "", normalized_query)
@@ -28,6 +29,12 @@ class ExploreRepository(BaseRepository):
             filters.append(FMMetaData.publication_doi.ilike(f"%{word}%"))
             filters.append(FMMetaData.tags.ilike(f"%{word}%"))
             filters.append(DSMetaData.tags.ilike(f"%{word}%"))
+        metrics_filters = []
+        if (number_of_features):
+            metrics_filters.append(DSMetrics.number_of_features == number_of_features)
+
+        if (number_of_models):
+            metrics_filters.append(DSMetrics.number_of_models == number_of_models)
 
         datasets = (
             self.model.query
@@ -35,7 +42,9 @@ class ExploreRepository(BaseRepository):
             .join(DSMetaData.authors)
             .join(DataSet.feature_models)
             .join(FeatureModel.fm_meta_data)
+            .join(DSMetaData.ds_metrics)
             .filter(or_(*filters))
+            .filter(and_(*metrics_filters))
             .filter(DSMetaData.dataset_doi.isnot(None))  # Exclude datasets with empty dataset_doi
         )
 
