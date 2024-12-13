@@ -51,8 +51,29 @@ class LoginBehavior(TaskSet):
             print(f"Login failed: {response.status_code}")
 
 
+class SignupBehaviorDeveloper(TaskSet):
+    @task
+    def signup(self):
+        response = self.client.get("/signup")
+        csrf_token = get_csrf_token(response)
+
+        response = self.client.post("/signup", data={
+            "name": fake.first_name(),
+            "surname": fake.last_name(),
+            "email": fake.email(),
+            "password": fake.password(),
+            "developer": True,
+            "github_user": "GitUserTest",
+            "csrf_token": csrf_token
+        })
+        if response.status_code != 200:
+            print(f"Signup failed: {response.status_code}")
+        else:
+            print("Signup successful")
+
+
 class AuthUser(HttpUser):
-    tasks = [SignupBehavior, LoginBehavior]
+    tasks = [SignupBehavior, LoginBehavior, SignupBehaviorDeveloper]
     min_wait = 5000
     max_wait = 9000
     host = get_host_for_locust_testing()
