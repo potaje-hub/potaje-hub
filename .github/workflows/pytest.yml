@@ -29,6 +29,5 @@ jobs:
           cp .env.local.example .env
 
       - name: Run Tests with pytest
-          - name: Run Tests with pytest
-            run: |
-              pytest --ignore=tests/selenium --ignore-glob='**/*selenium.py'
+        run: |
+          pytest --ignore=tests/selenium --ignore-glob='**/*selenium.py'
