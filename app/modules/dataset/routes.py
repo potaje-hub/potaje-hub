@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 from zipfile import ZipFile
 from app.modules.flamapy.routes import to_cnf_file, to_glencoe_file, to_splot_file
 from app.modules.hubfile.services import HubfileService
-
+from flask_login import login_required, current_user
 
 from flask import (
     redirect,
@@ -21,7 +21,7 @@ from flask import (
     url_for,
     send_file,
 )
-from flask_login import login_required, current_user
+
 
 from app.modules.dataset.forms import DataSetForm
 from app.modules.dataset.models import (
@@ -181,6 +181,7 @@ def delete():
 
 
 @dataset_bp.route("/dataset/download_all", methods=["GET"])
+@login_required
 def download_all_datasets():
     datasets = dataset_service.get_all_datasets()
 
@@ -193,9 +194,7 @@ def download_all_datasets():
             for subdir, dirs, files in os.walk(file_path):
                 for file in files:
                     full_path = os.path.join(subdir, file)
-
                     relative_path = os.path.relpath(full_path, file_path)
-
                     zipf.write(
                         full_path,
                         arcname=os.path.join(
