@@ -24,6 +24,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Load environment variables
+        run: |
+          cp .env.local.example .env
+
       - name: Run Tests with pytest
         run: |
           pytest --ignore=tests/selenium --ignore-glob='**/test_selenium.py'
