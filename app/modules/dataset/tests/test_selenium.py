@@ -172,7 +172,7 @@ def test_download_dataset_glencoe():
         wait_for_page_to_load(driver)
         time.sleep(2)  # Force wait time
 
-        print("Download all datasets test passed!")
+        print("Download all datasets in Glencoe test passed!")
 
     finally:
         # Close the browser
@@ -220,7 +220,7 @@ def test_download_dataset_DIMACS():
         driver.execute_script("arguments[0].click();", download_all_button)
         wait_for_page_to_load(driver)
         time.sleep(2)  # Force wait time
-        print("Download all datasets test passed!")
+        print("Download all datasets in DIMACS test passed!")
 
     finally:
         # Close the browser
@@ -269,7 +269,7 @@ def test_download_dataset_splot():
         wait_for_page_to_load(driver)
         time.sleep(2)  # Force wait time
 
-        print("Download all datasets test passed!")
+        print("Download all datasets in Splot test passed!")
 
     finally:
         # Close the browser
