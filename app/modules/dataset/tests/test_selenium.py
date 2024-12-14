@@ -6,6 +6,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 from core.environment.host import get_host_for_selenium_testing
 from core.selenium.common import initialize_driver, close_driver
+from selenium import webdriver
 
 
 def wait_for_page_to_load(driver, timeout=4):
@@ -115,7 +116,7 @@ def test_upload_dataset():
         upload_btn = driver.find_element(By.ID, "upload_button")
         upload_btn.send_keys(Keys.RETURN)
         wait_for_page_to_load(driver)
-        time.sleep(2)
+        time.sleep(5)
 
         assert driver.current_url == f"{host}/dataset/list", "Test failed!"
 
@@ -173,7 +174,7 @@ def test_download_dataset_glencoe():
         wait_for_page_to_load(driver)
         time.sleep(2)  # Force wait time
 
-        print("Download all datasets in Glencoe test passed!")
+        print("Download one dataset in Glencoe test passed!")
 
     finally:
         # Close the browser
@@ -221,7 +222,7 @@ def test_download_dataset_DIMACS():
         driver.execute_script("arguments[0].click();", download_all_button)
         wait_for_page_to_load(driver)
         time.sleep(2)  # Force wait time
-        print("Download all datasets in DIMACS test passed!")
+        print("Download one dataset in DIMACS test passed!")
 
     finally:
         # Close the browser
@@ -270,7 +271,7 @@ def test_download_dataset_splot():
         wait_for_page_to_load(driver)
         time.sleep(2)  # Force wait time
 
-        print("Download all datasets in Splot test passed!")
+        print("Download one dataset in Splot test passed!")
 
     finally:
         # Close the browser
@@ -311,10 +312,36 @@ def test_download_all_datasets():
         close_driver(driver)
 
 
+def test_download_all_datasets_no_logged():
+    driver = webdriver.Chrome()
+    driver.get("http://127.0.0.1:5000/")  # Open the website
+    time.sleep(2)  # Force wait time
+
+    try:
+        download_button = driver.find_element(By.ID, "downloadAll")
+        download_button.click()
+    except Exception as e:
+        print("Error al encontrar el botón:", e)
+        driver.quit()
+        return
+
+    time.sleep(2)  # Force wait time
+
+    # Check if the user is redirected to the login page
+    current_url = driver.current_url
+    assert "login" in current_url, f"Se esperaba redirigir a login, pero la URL es {current_url}"
+
+    print("Download all datasets no logged test passed!")
+
+    # Close the browser
+    driver.quit()
+
+
 # Call the test function
 
 test_upload_dataset()
 test_download_all_datasets()
+test_download_all_datasets_no_logged()
 test_download_dataset_glencoe()
 test_download_dataset_DIMACS()
 test_download_dataset_splot()
