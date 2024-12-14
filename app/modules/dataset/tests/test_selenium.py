@@ -6,6 +6,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 from core.environment.host import get_host_for_selenium_testing
 from core.selenium.common import initialize_driver, close_driver
+from selenium import webdriver
 
 
 def wait_for_page_to_load(driver, timeout=4):
@@ -311,10 +312,43 @@ def test_download_all_datasets():
         close_driver(driver)
 
 
+def test_download_all_datasets_no_logged():
+    # Configuración del driver (asegurate de usar el correcto para tu navegador)
+    driver = webdriver.Chrome()
+
+    # Abre la página de inicio
+    driver.get("http://127.0.0.1:5000/")  # Cambia la URL si es necesario
+
+    # Esperar a que cargue la página (si es necesario)
+    time.sleep(2)  # Puedes mejorar esto con WebDriverWait
+
+    # Buscar el botón de "Download All" y hacer clic
+    try:
+        download_button = driver.find_element(By.ID, "downloadAll")
+        download_button.click()
+    except Exception as e:
+        print("Error al encontrar el botón:", e)
+        driver.quit()
+        return
+
+    # Esperar a que la redirección ocurra
+    time.sleep(2)  # Mejor usar WebDriverWait aquí también
+
+    # Verificar si la URL es la del login
+    current_url = driver.current_url
+    assert "login" in current_url, f"Se esperaba redirigir a login, pero la URL es {current_url}"
+
+    print("Download all datasets no logged test passed!")
+
+    # Cerrar el navegador
+    driver.quit()
+
+
 # Call the test function
 
 test_upload_dataset()
 test_download_all_datasets()
+test_download_all_datasets_no_logged()
 test_download_dataset_glencoe()
 test_download_dataset_DIMACS()
 test_download_dataset_splot()
