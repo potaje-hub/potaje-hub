@@ -133,34 +133,41 @@ async def my_datasets(update: Update, context: ContextTypes.DEFAULT_TYPE):
     login_page = session.get(f"{BASE_URL}/dataset/list")
     soup = BeautifulSoup(login_page.text, 'html.parser')
 
+    keyboard_sync = []
+    keyboard_async = []
+
     # Sync
-    data_sync = soup.find('h1', string="My datasets").find_next_sibling('div')
-    dataset_links_sync = data_sync.find_all('a', href=True)
-    keyboard_sync = [
-        [InlineKeyboardButton(link.get_text().strip(),
-                              url=str(link['href']).replace("http://localhost:5000", BASE_URL))]
-        for link in dataset_links_sync if not link.get_text().strip().startswith("http://localhost:5000")
-    ]
-    reply_markup_sync = InlineKeyboardMarkup(keyboard_sync)
+    if soup.find('h1', string="My datasets"):
+        data_sync = soup.find('h1', string="My datasets").find_next_sibling('div')
+        dataset_links_sync = data_sync.find_all('a', href=True)
+        keyboard_sync = [
+            [InlineKeyboardButton(link.get_text().strip(),
+                                  url=str(link['href']).replace("http://localhost:5000", BASE_URL))]
+            for link in dataset_links_sync if not link.get_text().strip().startswith("http://localhost:5000")
+        ]
+        reply_markup_sync = InlineKeyboardMarkup(keyboard_sync)
 
     # Async
-    data_async = soup.find('h5', string="Unsynchronized datasets").find_next('table').find_all('tr')
-    keyboard_async = []
-    for row in data_async[1:]:
-        link = row.find('a')
-        if link:
-            text = link.get_text(strip=True)
-            href = link['href']
-            keyboard_async.append([InlineKeyboardButton(text, f"{BASE_URL}{href}")])
+    if soup.find('h5', string="Unsynchronized datasets"):
+        data_async = soup.find('h5', string="Unsynchronized datasets").find_next('table').find_all('tr')
+        keyboard_async = []
+        for row in data_async[1:]:
+            link = row.find('a')
+            if link:
+                text = link.get_text(strip=True)
+                href = link['href']
+                keyboard_async.append([InlineKeyboardButton(text, f"{BASE_URL}{href}")])
 
-    reply_markup_async = InlineKeyboardMarkup(keyboard_async)
+        reply_markup_async = InlineKeyboardMarkup(keyboard_async)
 
     if ((len(keyboard_sync)+len(keyboard_async)) == 0):
         await context.bot.send_message(chat_id=update.effective_chat.id, text="No existen datasets")
+
     await context.bot.send_message(chat_id=update.effective_chat.id,
                                    text="Datasets sincronizados:", reply_markup=reply_markup_sync)
-    await context.bot.send_message(chat_id=update.effective_chat.id,
-                                   text="Datasets no sincronizados:", reply_markup=reply_markup_async)
+    if len(keyboard_async) > 0:
+        await context.bot.send_message(chat_id=update.effective_chat.id,
+                                       text="Datasets no sincronizados:", reply_markup=reply_markup_async)
 
 
 async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
