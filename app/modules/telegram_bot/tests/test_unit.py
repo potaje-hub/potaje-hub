@@ -5,7 +5,7 @@ from telegram import (
 )
 from telegram.ext import ContextTypes
 from decouple import config
-from app.modules.telegram_bot.main import (
+from app.modules.telegram_bot.routes import (
     start, login, is_valid_email, email, password, cancel, logout, BASE_URL,
     handle_document, login_to_portal, test, logged_in_users, my_datasets,
     upload, title, description, publication_type, doi, tags, confirmation
@@ -103,7 +103,7 @@ def test_login_to_portal(mock_session):
 @pytest.mark.asyncio
 async def test_logout(context, update):
 
-    with patch("app.modules.telegram_bot.main.session.get") as mock_get:
+    with patch("app.modules.telegram_bot.routes.session.get") as mock_get:
         mock_get.return_value = MagicMock()
         await logout(update, context)
 
@@ -113,7 +113,7 @@ async def test_logout(context, update):
 
 
 @pytest.mark.asyncio
-@patch("app.modules.telegram_bot.main.session.get")
+@patch("app.modules.telegram_bot.routes.session.get")
 async def test_my_datasets(mock_get, update, context):
 
     mock_get.return_value.text = """
@@ -151,7 +151,7 @@ async def test_my_datasets(mock_get, update, context):
 
 
 @pytest.mark.asyncio
-@patch("app.modules.telegram_bot.main.media_route", "app/modules/telegram_bot/tests/")
+@patch("app.modules.telegram_bot.routes.media_route", "app/modules/telegram_bot/tests/")
 @patch("os.makedirs")
 @patch("os.path.exists", return_value=False)
 @patch("os.listdir", return_value=["test_file.uvl"])
@@ -218,7 +218,7 @@ async def test_upload(update, context):
 
     with patch('os.path.exists', return_value=True), \
          patch('os.listdir', return_value=['file1.uvl']), \
-         patch('app.modules.telegram_bot.main.session.post') as mock_post:
+         patch('app.modules.telegram_bot.routes.session.post') as mock_post:
 
         mock_post.return_value.status_code = 200
         mock_post.return_value.json.return_value = {'message': 'Success'}
