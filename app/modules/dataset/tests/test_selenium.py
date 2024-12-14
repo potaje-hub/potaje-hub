@@ -116,7 +116,7 @@ def test_upload_dataset():
         upload_btn = driver.find_element(By.ID, "upload_button")
         upload_btn.send_keys(Keys.RETURN)
         wait_for_page_to_load(driver)
-        time.sleep(5)
+        time.sleep(7)
 
         assert driver.current_url == f"{host}/dataset/list", "Test failed!"
 
@@ -278,6 +278,151 @@ def test_download_dataset_splot():
         close_driver(driver)
 
 
+def test_export_file_glencoe():
+    driver = initialize_driver()
+
+    try:
+        host = get_host_for_selenium_testing()
+
+        # Open the login page
+        driver.get(f"{host}/login")
+        wait_for_page_to_load(driver)
+
+        # Find the username and password field and enter the values
+        email_field = driver.find_element(By.NAME, "email")
+        password_field = driver.find_element(By.NAME, "password")
+
+        email_field.send_keys("user1@example.com")
+        password_field.send_keys("1234")
+
+        # Send the form
+        password_field.send_keys(Keys.RETURN)
+        wait_for_page_to_load(driver)
+
+        # Open the dataset list page
+        driver.get(f"{host}/dataset/list")
+        wait_for_page_to_load(driver)
+
+        # Click on the first dataset in the list
+        first_dataset = driver.find_element(By.XPATH, "//table//tbody//tr[1]//td[1]//a")
+        first_dataset.click()
+        wait_for_page_to_load(driver)
+
+        # Click the dropdown to reveal the export button for the first file
+        dropdown = driver.find_element(By.XPATH,
+                                       "//div[@class='list-group-item']//button[contains(@id, 'btnGroupDropExport')]")
+        driver.execute_script("arguments[0].click();", dropdown)
+        wait_for_page_to_load(driver)
+
+        # Click the export button for DIMACS for the first file
+        export_button = driver.find_element(By.XPATH, "//div[@class='list-group-item']//a[@id='export-Glencoe']")
+        driver.execute_script("arguments[0].click();", export_button)
+        wait_for_page_to_load(driver)
+
+        print("Export file to Glencoe test passed!")
+
+    finally:
+        # Close the browser
+        close_driver(driver)
+
+
+def test_export_file_splot():
+    driver = initialize_driver()
+
+    try:
+        host = get_host_for_selenium_testing()
+
+        # Open the login page
+        driver.get(f"{host}/login")
+        wait_for_page_to_load(driver)
+
+        # Find the username and password field and enter the values
+        email_field = driver.find_element(By.NAME, "email")
+        password_field = driver.find_element(By.NAME, "password")
+
+        email_field.send_keys("user1@example.com")
+        password_field.send_keys("1234")
+
+        # Send the form
+        password_field.send_keys(Keys.RETURN)
+        wait_for_page_to_load(driver)
+
+        # Open the dataset list page
+        driver.get(f"{host}/dataset/list")
+        wait_for_page_to_load(driver)
+
+        # Click on the first dataset in the list
+        first_dataset = driver.find_element(By.XPATH, "//table//tbody//tr[1]//td[1]//a")
+        first_dataset.click()
+        wait_for_page_to_load(driver)
+
+        # Click the dropdown to reveal the export button for the first file
+        dropdown = driver.find_element(By.XPATH,
+                                       "//div[@class='list-group-item']//button[contains(@id, 'btnGroupDropExport')]")
+        driver.execute_script("arguments[0].click();", dropdown)
+        wait_for_page_to_load(driver)
+
+        # Click the export button for DIMACS for the first file
+        export_button = driver.find_element(By.XPATH,
+                                            "//div[@class='list-group-item']//a[@id='export-SPLOT']")
+        driver.execute_script("arguments[0].click();", export_button)
+        wait_for_page_to_load(driver)
+
+        print("Export file to Splot test passed!")
+
+    finally:
+        # Close the browser
+        close_driver(driver)
+
+
+def test_export_file_DIMACS():
+    driver = initialize_driver()
+
+    try:
+        host = get_host_for_selenium_testing()
+
+        # Open the login page
+        driver.get(f"{host}/login")
+        wait_for_page_to_load(driver)
+
+        # Find the username and password field and enter the values
+        email_field = driver.find_element(By.NAME, "email")
+        password_field = driver.find_element(By.NAME, "password")
+
+        email_field.send_keys("user1@example.com")
+        password_field.send_keys("1234")
+
+        # Send the form
+        password_field.send_keys(Keys.RETURN)
+        wait_for_page_to_load(driver)
+
+        # Open the dataset list page
+        driver.get(f"{host}/dataset/list")
+        wait_for_page_to_load(driver)
+
+        # Click on the first dataset in the list
+        first_dataset = driver.find_element(By.XPATH, "//table//tbody//tr[1]//td[1]//a")
+        first_dataset.click()
+        wait_for_page_to_load(driver)
+
+        # Click the dropdown to reveal the export button for the first file
+        dropdown = driver.find_element(By.XPATH,
+                                       "//div[@class='list-group-item']//button[contains(@id, 'btnGroupDropExport')]")
+        driver.execute_script("arguments[0].click();", dropdown)
+        wait_for_page_to_load(driver)
+
+        # Click the export button for DIMACS for the first file
+        export_button = driver.find_element(By.XPATH, "//div[@class='list-group-item']//a[@id='export-DIMACS']")
+        driver.execute_script("arguments[0].click();", export_button)
+        wait_for_page_to_load(driver)
+
+        print("Export file to DIMACS test passed!")
+
+    finally:
+        # Close the browser
+        close_driver(driver)
+
+
 def test_download_all_datasets():
     driver = initialize_driver()
 
@@ -345,3 +490,6 @@ test_download_all_datasets_no_logged()
 test_download_dataset_glencoe()
 test_download_dataset_DIMACS()
 test_download_dataset_splot()
+test_export_file_DIMACS()
+test_export_file_glencoe()
+test_export_file_splot()
