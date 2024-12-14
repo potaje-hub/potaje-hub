@@ -132,7 +132,7 @@ async def my_datasets(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     login_page = session.get(f"{BASE_URL}/dataset/list")
     soup = BeautifulSoup(login_page.text, 'html.parser')
-    
+
     keyboard_sync = []
     keyboard_async = []
 
@@ -142,7 +142,7 @@ async def my_datasets(update: Update, context: ContextTypes.DEFAULT_TYPE):
         dataset_links_sync = data_sync.find_all('a', href=True)
         keyboard_sync = [
             [InlineKeyboardButton(link.get_text().strip(),
-                                url=str(link['href']).replace("http://localhost:5000", BASE_URL))]
+                                  url=str(link['href']).replace("http://localhost:5000", BASE_URL))]
             for link in dataset_links_sync if not link.get_text().strip().startswith("http://localhost:5000")
         ]
         reply_markup_sync = InlineKeyboardMarkup(keyboard_sync)
@@ -162,12 +162,12 @@ async def my_datasets(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if ((len(keyboard_sync)+len(keyboard_async)) == 0):
         await context.bot.send_message(chat_id=update.effective_chat.id, text="No existen datasets")
-        
+
     await context.bot.send_message(chat_id=update.effective_chat.id,
                                    text="Datasets sincronizados:", reply_markup=reply_markup_sync)
     if len(keyboard_async) > 0:
         await context.bot.send_message(chat_id=update.effective_chat.id,
-                                   text="Datasets no sincronizados:", reply_markup=reply_markup_async)
+                                       text="Datasets no sincronizados:", reply_markup=reply_markup_async)
 
 
 async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
