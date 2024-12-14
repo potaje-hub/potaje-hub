@@ -2,7 +2,7 @@
   become: true
 
   tasks:
-    - name: Add deadsnakes PPA (for installing Python 3.12)
+    - name: Add deadsnakes PPA for installing Python 3.12
       apt_repository:
         repo: ppa:deadsnakes/ppa
         state: present
@@ -13,14 +13,13 @@
         name:
           - python3.12
           - python3.12-venv
-          - python3.12-distutils
           - mariadb-client
         state: present
 
     - name: Install pip and setuptools for Python 3.12 from source
       shell: |
-        wget https://bootstrap.pypa.io/get-pip.py
-        python3.12 get-pip.py
+        wget https://bootstrap.pypa.io/get-pip.py -O /tmp/get-pip.py
+        python3.12 /tmp/get-pip.py
       args:
         executable: /bin/bash
 
@@ -32,18 +31,18 @@
 
     - name: Remove existing virtual environment if it exists
       file:
-        path: "{{ working_dir }}venv"
+        path: "{{ working_dir }}/venv"
         state: absent
         force: yes
 
     - name: Set up the Python 3.12 virtual environment
-      command: python3.12 -m venv {{ working_dir }}venv
+      command: python3.12 -m venv {{ working_dir }}/venv
       args:
-        creates: "{{ working_dir }}venv/bin/activate"
+        creates: "{{ working_dir }}/venv/bin/activate"
 
     - name: Activate the virtual environment and install dependencies
       shell: |
-        source {{ working_dir }}venv/bin/activate
+        source {{ working_dir }}/venv/bin/activate
         pip install --upgrade pip
         cd {{ working_dir }}
         pip install -r requirements.txt
