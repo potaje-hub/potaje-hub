@@ -5,7 +5,7 @@ from telegram import (
 )
 from telegram.ext import ContextTypes
 from decouple import config
-from app.modules.telegram_bot.main import (
+from app.modules.telegram_bot.routes import (
     start, login, is_valid_email, email, password, cancel, logout, BASE_URL,
     handle_document, login_to_portal, test, logged_in_users, my_datasets,
     upload, title, description, publication_type, doi, tags, confirmation
