@@ -1,0 +1,18 @@
+---
+- hosts: all
+  become: true
+
+  tasks:
+
+    - name: Pull latest changes from Git
+      shell: |
+        cd {{ working_dir }}
+        git pull origin main
+      args:
+        executable: /bin/bash
+
+    - name: Restart application
+      shell: |
+        systemctl restart app.service
+      args:
+        executable: /bin/bash
