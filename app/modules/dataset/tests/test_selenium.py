@@ -313,16 +313,10 @@ def test_download_all_datasets():
 
 
 def test_download_all_datasets_no_logged():
-    # Configuración del driver (asegurate de usar el correcto para tu navegador)
     driver = webdriver.Chrome()
+    driver.get("http://127.0.0.1:5000/")  # Open the website
+    time.sleep(2)  # Force wait time
 
-    # Abre la página de inicio
-    driver.get("http://127.0.0.1:5000/")  # Cambia la URL si es necesario
-
-    # Esperar a que cargue la página (si es necesario)
-    time.sleep(2)  # Puedes mejorar esto con WebDriverWait
-
-    # Buscar el botón de "Download All" y hacer clic
     try:
         download_button = driver.find_element(By.ID, "downloadAll")
         download_button.click()
@@ -331,16 +325,15 @@ def test_download_all_datasets_no_logged():
         driver.quit()
         return
 
-    # Esperar a que la redirección ocurra
-    time.sleep(2)  # Mejor usar WebDriverWait aquí también
+    time.sleep(2)  # Force wait time
 
-    # Verificar si la URL es la del login
+    # Check if the user is redirected to the login page
     current_url = driver.current_url
     assert "login" in current_url, f"Se esperaba redirigir a login, pero la URL es {current_url}"
 
     print("Download all datasets no logged test passed!")
 
-    # Cerrar el navegador
+    # Close the browser
     driver.quit()
 
 
