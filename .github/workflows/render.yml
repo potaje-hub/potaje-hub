@@ -42,6 +42,7 @@ jobs:
 
     - name: Copy .env file
       run: |
+        cp .env.local.example .env
         cp .env.local.example .env.local
 
     - name: Run Flask
