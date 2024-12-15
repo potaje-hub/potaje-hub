@@ -30,7 +30,7 @@ Before running the application, ensure that you have the following installed:
 
 1. Clone the repository:
 
-   ```
+   ```bash
    git clone https://github.com/potaje-hub/potaje-hub.git
    
    cd potaje-hub
@@ -38,7 +38,7 @@ Before running the application, ensure that you have the following installed:
 
 2. Create and activate a virtual environment:
 
-   ```
+   ```bash
    python3 -m venv venv
 
    source venv/bin/activate  # On Windows, use venv\Scripts\activate
@@ -46,13 +46,14 @@ Before running the application, ensure that you have the following installed:
 
 3. Install the required dependencies:
 
-   ```
+   ```bash
    pip install -r requirements.txt
    ```
 
 4. Copy the `.env` file from the provided example:
 
-   ```
+   ```bash
+   rm .env # If you already have an .env file.
    cp .env.local.example .env
    ```
 
@@ -116,7 +117,7 @@ Before running the application, ensure that you have the following installed:
 
 Once the environment is set up, run the application using the following command:
 
-   ```
+   ```bash
    flask run --host=0.0.0.0
    ```
 
@@ -126,7 +127,7 @@ This will start the web server, and you can access the application in your brows
 
 To run the tests, execute the following command:
 
-   ```
+   ```bash
    pytest
    ```
 
@@ -141,39 +142,73 @@ Follow these steps to set up the application using Vagrant:
 1. **Install Vagrant**:
    Ensure you have Vagrant installed. You can download it from [here](https://www.vagrantup.com/downloads).
 
-2. **Clone the repository**:
+2. **Install Ansible & VIrtualBox**
    ```bash
-   git clone https://github.com/potaje-hub/potaje-hub.git
-   cd potaje-hub
+   sudo apt install ansible virtualbox
+   ```
+   
+3. **Copy the .env file**:
+   ```bash
+   rm .env # If you already have an .env file.
+   cp .env.vagrant.example
+   ```
+   
+4. **Change to Vagrant directory**:
+   ```bash
+   cd vagrant
    ```
 
-3. **Start the Vagrant machine**:
+5. **Start the Vagrant machine**:
    ```bash
    vagrant up
    ```
    This command will download the necessary box, set up the virtual machine, and provision it with all the required dependencies.
 
-4. **Access the Vagrant machine**:
+   If some error occurs during the provision, you should use the command `vagrant up --provision`
+
+6. **Access the Vagrant machine**:
    ```bash
    vagrant ssh
    ```
 
-5. **Navigate to the application directory inside the VM**:
-   ```bash
-   cd /vagrant
-   ```
-
-6. **Run the application**:
+7. **Run the application**:
    ```bash
    flask run --host=0.0.0.0
    ```
    The application will be accessible at `http://localhost:5000` on your host machine.
 
-7. **Stop the Vagrant machine**:
-   When you're done, you can stop the Vagrant machine with:
+9. **Run tests**:
    ```bash
-   vagrant halt
+   pytest app/modules/ --ignore-glob='*selenium*'
    ```
+
+10. **Stop the Vagrant machine**:
+    
+    When you're done, you can stop the Vagrant machine with:
+   
+    ```bash
+    vagrant halt
+    ```
+   
+11. **Destroy the Vagrant machine**:
+
+    If you want to destroy the Vagrant machine, use:
+    ```bash
+    vagrant destroy
+    ```
+
+12. **(Optional) Restore the local configuration**:
+
+    Ensure you are in the root directory.
+    ```bash
+    rm -rf venv
+    deactivate
+    python3 -m venv venv
+    source venv/bin/activate  # On Windows, use venv\Scripts\activate
+    pip install -r requirements.txt
+    rm .env # If you already have an .env file.
+    cp .env.local.example .env
+    ```
 
 ## Official documentation
 
