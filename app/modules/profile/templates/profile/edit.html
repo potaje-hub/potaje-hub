@@ -90,6 +90,38 @@
 
                 </div>
 
+                <div class="row form-group mt-3">
+                    <div class="col-12">
+                        {{ form.developer.label(class="form-label") }}
+                        
+                        {% set developer_value = form.developer.data if form.developer.data else (current_user.profile.user.developer if current_user.profile.user.developer else False) %}
+                        
+                        {{ form.developer(class="form-check-input", id="developer_checkbox", checked=developer_value) }}
+                        
+                        {% for error in form.developer.errors %}
+                            <span style="color: red;">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                
+                <div id="github-user-field" class="row form-group mt-3"
+                {% if not form.developer.data and not current_user.profile.user.developer %}
+                    style="display: none;"
+                {% endif %}>
+
+                    <div class="col-12">
+                        {{ form.github_user.label(class="form-label") }}
+                        {% set github_user_value = form.github_user.data if form.github_user.data else (current_user.profile.user.github_user  if current_user.profile.user.github_user else '') %}
+                        {{ form.github_user(class="form-control", placeholder="Enter your GitHub User",
+                        required=true, value=github_user_value) }}
+                        {% for error in form.github_user.errors %}
+                            <span style="color: red;">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+
+                </div>
+
                 <div class="row form-group">
 
                     <div class="col-12 mt-3">
@@ -110,7 +142,7 @@
                 {% if error %}
 
                     <div class="mt-3">
-                        <p style="color: red;"><strong>Error:</strong> {{ error }}
+                        <p style="color: red;"><strong>Error:</strong> {{ error }}</p>
                     </div>
 
                 {% endif %}
@@ -125,4 +157,21 @@
 
 {% block scripts %}
     <script src="{{ url_for('profile.scripts') }}"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var developerCheckbox = document.getElementById('developer_checkbox');
+            var githubUserField = document.getElementById('github-user-field');
+        
+            developerCheckbox.addEventListener('change', function() {
+                if (developerCheckbox.checked) {
+                    githubUserField.style.display = 'block';
+                } else {
+                    githubUserField.style.display = 'none';
+                }
+            });
+    
+            developerCheckbox.dispatchEvent(new Event('change'));
+        });
+        </script>
 {% endblock %}
