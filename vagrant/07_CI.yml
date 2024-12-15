@@ -6,7 +6,7 @@
     - name: Pull latest changes from Git
       shell: |
         cd {{ working_dir }}
-        git pull origin main
+        git pull origin
       args:
         executable: /bin/bash
 
