@@ -29,6 +29,7 @@ flamapy-sat==2.0.0.dev1
 Flask==3.0.3
 Flask-Cors==4.0.1
 Flask-Login==0.6.3
+Flask-Mail==0.10.0
 Flask-Migrate==4.0.7
 Flask-RESTful==0.3.10
 Flask-SQLAlchemy==3.1.1
