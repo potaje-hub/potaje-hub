@@ -15,6 +15,7 @@
       MARIADB_PASSWORD: "{{ mariadb_password }}"
       MARIADB_ROOT_PASSWORD: "{{ mariadb_root_password }}"
       WORKING_DIR: "{{ working_dir }}"
+      TELEGRAM_BOT_TOKEN: "{{ telegram_bot_token }}"
 
   tasks:
 
@@ -44,3 +45,12 @@
       environment: "{{ common_environment }}"
       async: 1
       poll: 0
+
+    - name: Run Tests
+      shell: |
+        source {{ working_dir }}venv/bin/activate
+        cd {{ working_dir }}
+        pytest app/modules/ --ignore-glob='*selenium*'
+      args:
+        executable: /bin/bash
+      environment: "{{ common_environment }}"

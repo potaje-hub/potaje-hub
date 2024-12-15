@@ -30,31 +30,95 @@ Before running the application, ensure that you have the following installed:
 
 1. Clone the repository:
 
-   `git clone https://github.com/potaje-hub/potaje-hub.git` 
-  
-   `cd potaje-hub`
+   ```
+   git clone https://github.com/potaje-hub/potaje-hub.git
+   
+   cd potaje-hub
+   ```
 
 2. Create and activate a virtual environment:
 
-   `python3 -m venv venv`
+   ```
+   python3 -m venv venv
 
-   `source venv/bin/activate`  # On Windows, use `venv\Scripts\activate`
+   source venv/bin/activate  # On Windows, use venv\Scripts\activate
+   ```
 
 3. Install the required dependencies:
 
-   `pip install -r requirements.txt`
+   ```
+   pip install -r requirements.txt
+   ```
 
 4. Copy the `.env` file from the provided example:
 
-   `cp .env.local.example .env`
+   ```
+   cp .env.local.example .env
+   ```
 
    Note: The `.env` file contains sensitive information like database credentials and API keys. Make sure to update it with the appropriate values if necessary.
+
+5. Configure the database:
+
+   - Install & configure MariaDB:
+      ```sudo apt install mariadb-server -y
+      sudo systemctl start mariadb
+      sudo mysql_secure_installation
+      ```
+
+   - Log in to MySQL:
+     ```bash
+     mysql -u root -p
+     ```
+
+   - Create a new database:
+     ```sql
+     CREATE DATABASE uvlhub;
+     ```
+
+   - Create a user and grant privileges:
+     ```sql
+     CREATE USER 'uvlhub_user'@'localhost' IDENTIFIED BY 'uvlhub_password';
+     GRANT ALL PRIVILEGES ON uvlhub.* TO 'uvlhub_user'@'localhost';
+     FLUSH PRIVILEGES;
+     ```
+
+   - Verify the user and database:
+     ```sql
+     SHOW DATABASES;
+     SHOW GRANTS FOR 'uvlhub_user'@'localhost';
+     ```
+
+6. Configure database connection in `.env` file:
+
+   Open the `.env` file and set the following variables:
+   ```env
+   MARIADB_HOSTNAME=127.0.0.1
+   MARIADB_PORT=3306
+   MARIADB_DATABASE=uvlhub
+   MARIADB_USER=uvlhub_user
+   MARIADB_PASSWORD=uvlhub_password
+   ```
+
+7. Apply database migrations:
+
+   ```bash
+   flask db upgrade
+   ```
+
+8. Seed the database with initial data:
+
+   ```bash
+   rosemary db:seed
+   ```
 
 ## Running the application
 
 Once the environment is set up, run the application using the following command:
 
-   `flask run --host=0.0.0.0`
+   ```
+   flask run --host=0.0.0.0
+   ```
 
 This will start the web server, and you can access the application in your browser at `http://localhost:5000`.
 
@@ -62,11 +126,54 @@ This will start the web server, and you can access the application in your brows
 
 To run the tests, execute the following command:
 
-   `pytest`
+   ```
+   pytest
+   ```
 
 This will run all the tests in the `app/modules/` directory.
 
 Make sure that the necessary services (like MySQL) are running and accessible before running the tests.
+
+## Installation with Vagrant
+
+Follow these steps to set up the application using Vagrant:
+
+1. **Install Vagrant**:
+   Ensure you have Vagrant installed. You can download it from [here](https://www.vagrantup.com/downloads).
+
+2. **Clone the repository**:
+   ```bash
+   git clone https://github.com/potaje-hub/potaje-hub.git
+   cd potaje-hub
+   ```
+
+3. **Start the Vagrant machine**:
+   ```bash
+   vagrant up
+   ```
+   This command will download the necessary box, set up the virtual machine, and provision it with all the required dependencies.
+
+4. **Access the Vagrant machine**:
+   ```bash
+   vagrant ssh
+   ```
+
+5. **Navigate to the application directory inside the VM**:
+   ```bash
+   cd /vagrant
+   ```
+
+6. **Run the application**:
+   ```bash
+   flask run --host=0.0.0.0
+   ```
+   The application will be accessible at `http://localhost:5000` on your host machine.
+
+7. **Stop the Vagrant machine**:
+   When you're done, you can stop the Vagrant machine with:
+   ```bash
+   vagrant halt
+   ```
 
 ## Official documentation
 

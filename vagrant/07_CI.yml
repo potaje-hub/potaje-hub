@@ -1,0 +1,26 @@
+- hosts: all
+  become: true
+
+  tasks:
+
+    - name: Pull latest changes from Git
+      shell: |
+        cd {{ working_dir }}
+        git pull origin
+      args:
+        executable: /bin/bash
+
+    - name: Stop existing Flask application
+      shell: |
+        pkill -f "flask run --host=0.0.0.0 --port=5000 --reload --debug"
+      ignore_errors: yes
+      args:
+        executable: /bin/bash
+
+    - name: Start Flask application
+      shell: |
+        source {{ working_dir }}/venv/bin/activate
+        cd {{ working_dir }}
+        nohup flask run --host=0.0.0.0 --port=5000 --reload --debug > app.log 2>&1 &
+      args:
+        executable: /bin/bash
