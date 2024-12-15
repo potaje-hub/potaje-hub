@@ -1,4 +1,3 @@
----
 - hosts: all
   become: true
 
@@ -11,8 +10,17 @@
       args:
         executable: /bin/bash
 
-    - name: Restart application
+    - name: Stop existing Flask application
       shell: |
-        systemctl restart app.service
+        pkill -f "flask run --host=0.0.0.0 --port=5000 --reload --debug"
+      ignore_errors: yes
+      args:
+        executable: /bin/bash
+
+    - name: Start Flask application
+      shell: |
+        source {{ working_dir }}/venv/bin/activate
+        cd {{ working_dir }}
+        nohup flask run --host=0.0.0.0 --port=5000 --reload --debug > app.log 2>&1 &
       args:
         executable: /bin/bash
