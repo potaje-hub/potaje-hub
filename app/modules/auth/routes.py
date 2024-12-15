@@ -49,8 +49,8 @@ def show_signup_form():
             msg = Message(
                 'Verifique su correo',
                 sender='noreply@demo.com',
-                recipients=['uvlhubio@gmail.com'])
-            msg.body = f'Por favor, haga clic en el siguiente enlace para verificar su correo:{confirm_url}'
+                recipients=[email])
+            msg.body = f'Por favor, haga clic en el siguiente enlace para verificar su correo: {confirm_url}'
 
             # Send the email
             mail.send(msg)
