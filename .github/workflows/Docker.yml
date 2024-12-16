@@ -23,7 +23,7 @@ jobs:
 
       - name: Build and tag Docker image
         run: |
-          docker build -t potaje-hub:dev -f docker/images/Dockerfile.dev ../
+          docker build -t potaje-hub:dev -f docker/images/Dockerfile.dev .
         
       - name: Push Docker image to Docker Hub
         run: |
