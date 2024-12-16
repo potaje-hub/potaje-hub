@@ -150,7 +150,7 @@ Follow these steps to set up the application using Vagrant:
 3. **Copy the .env file**:
    ```bash
    rm .env # If you already have an .env file.
-   cp .env.vagrant.example
+   cp .env.vagrant.example .env
    ```
    
 4. **Change to Vagrant directory**:
