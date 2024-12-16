@@ -42,7 +42,9 @@ def upgrade():
     sa.Column('password', sa.String(length=256), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('email')
+    sa.UniqueConstraint('email'),
+    sa.Column('github_user', sa.String(length=256), nullable=True),
+    sa.Column('is_confirmed', sa.Boolean(), nullable=False)
     )
     op.create_table('webhook',
     sa.Column('id', sa.Integer(), nullable=False),
