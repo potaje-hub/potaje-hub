@@ -14,9 +14,9 @@ class User(db.Model, UserMixin):
     created_at = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
     developer = db.Column(db.Boolean, nullable=True, default=False)
     github_user = db.Column(db.String(256), default="")
-
     data_sets = db.relationship('DataSet', backref='user', lazy=True)
     profile = db.relationship('UserProfile', backref='user', uselist=False)
+    is_confirmed = db.Column(db.Boolean, nullable=False, default=True)
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
