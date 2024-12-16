@@ -28,6 +28,8 @@ COPY requirements.txt .
 # Removes cache at the build stage
 RUN find . -type d -name "__pycache__" -exec rm -r {} + && \
     find . -type f -name "*.pyc" -exec rm -f {} +
+    
+RUN rm -f migrations/versions/4b1382609320.py
 
 # Copy entrypoint and set execution permissions
 COPY docker/entrypoints/render_entrypoint.sh /app/render_entrypoint.sh
