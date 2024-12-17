@@ -48,6 +48,7 @@ Before running the application, ensure that you have the following installed:
 
    ```bash
    pip install -r requirements.txt
+   pip install -e ./
    ```
 
 4. Copy the `.env` file from the provided example:
